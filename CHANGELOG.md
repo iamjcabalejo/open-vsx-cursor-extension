@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.1.0] - 2026-03-01
+
+### Added
+
+- **Cursor**: When applying the workflow for Cursor, you can choose to install at **project level** (`.cursor` and `.cursor-plugin` in this workspace) or **user level** (`~/.cursor` and `~/.cursor-plugin`). User level applies the workflow to all projects.
+
+## [4.0.5] - 2026-03-01
+
+### Added
+
+- **Claude Code**: When applying the workflow for Claude Code, you are now asked whether to install in the **project root** (`.claude` in this workspace) or in your **user directory** (`~/.claude/`). User directory applies the workflow to all projects without a per-project `.claude` folder.
+- **Claude Code**: Apply workflow now copies **`.claude/rules/`** (including the compounding dev cycle, core standards, api-routes, etc.) and **`.claude/skills/`** (all skills with SKILL.md and supporting files) from the extension, so Claude Code loads them as modular rules and skills in addition to the combined CLAUDE.md.
+- **Codex**: Apply workflow now writes **~/.codex/AGENTS.md** at **user level** with the **compounding dev cycle** so it applies in all projects (Codex merges global + project AGENTS.md). Workspace still gets project-level AGENTS.md with full rules and agent summaries.
+- **GitHub Copilot**: Apply workflow now installs **rules, agents, and skills** at **user level** in the VS Code/Cursor **prompts** folder as `plan-code-review-workflow.instructions.md` (applyTo: `**`), so the full workflow applies in all workspaces. Skills are listed with name and description from `.cursor/skills`. Workspace still gets `.github/copilot-instructions.md` and `AGENTS.md`.
+
 ## [4.0.4] - 2025-03-01
 
 ### Changed

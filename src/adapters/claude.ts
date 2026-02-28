@@ -1,10 +1,26 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult } from "./types";
 
 function stripFrontmatter(content: string): string {
   const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
   return match ? match[1].trim() : content;
+}
+
+/** Recursively copy a directory (e.g. skills with SKILL.md and subdirs). */
+function copyDirRecursive(src: string, dest: string): void {
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const e of entries) {
+    const srcPath = path.join(src, e.name);
+    const destPath = path.join(dest, e.name);
+    if (e.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 function buildClaudeMd(extensionPath: string): string {
@@ -32,19 +48,29 @@ function buildClaudeMd(extensionPath: string): string {
 }
 
 /**
- * Apply workflow for Claude Code: .claude/agents, CLAUDE.md, optional hooks in .claude/settings.json.
+ * Apply workflow for Claude Code: .claude/agents, .claude/rules, .claude/skills, CLAUDE.md, optional hooks in .claude/settings.json.
+ * When claudeInstallTarget is "user", writes to ~/.claude/ (all projects). Otherwise writes to project root.
  */
 export async function applyClaude(context: AdapterContext): Promise<ApplyResult> {
-  const { extensionPath, workspaceRootPath } = context;
-  if (!workspaceRootPath) {
+  const { extensionPath, workspaceRootPath, claudeInstallTarget = "project" } = context;
+  const isUser = claudeInstallTarget === "user";
+
+  if (!isUser && !workspaceRootPath) {
     return {
       success: false,
       message: "No workspace folder open. Open a folder first, then run the command again.",
     };
   }
+
+  const claudeDir = isUser
+    ? path.join(os.homedir(), ".claude")
+    : path.join(workspaceRootPath!, ".claude");
+  const claudeMdPath = isUser
+    ? path.join(claudeDir, "CLAUDE.md")
+    : path.join(workspaceRootPath!, "CLAUDE.md");
+
   const details: string[] = [];
   try {
-    const claudeDir = path.join(workspaceRootPath, ".claude");
     const agentsSrc = path.join(extensionPath, ".cursor", "agents");
     const agentsDest = path.join(claudeDir, "agents");
     const hooksSrc = path.join(extensionPath, ".cursor", "hooks");
@@ -68,10 +94,33 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
     }
     details.push(".claude/agents/ (agent definitions)");
 
-    // CLAUDE.md at project root (Claude Code reads CLAUDE.md or .claude/CLAUDE.md)
-    const claudeMdPath = path.join(workspaceRootPath, "CLAUDE.md");
+    // Copy rules (.mdc and .md) so Claude Code loads them from .claude/rules/ (includes compounding dev cycle)
+    const rulesSrc = path.join(extensionPath, ".cursor", "rules");
+    const rulesDest = path.join(claudeDir, "rules");
+    if (fs.existsSync(rulesSrc)) {
+      if (!fs.existsSync(rulesDest)) fs.mkdirSync(rulesDest, { recursive: true });
+      const ruleEntries = fs.readdirSync(rulesSrc, { withFileTypes: true });
+      for (const e of ruleEntries) {
+        if (!e.isFile()) continue;
+        if (!e.name.endsWith(".mdc") && !e.name.endsWith(".md")) continue;
+        if (e.name === "README.md") continue;
+        fs.copyFileSync(path.join(rulesSrc, e.name), path.join(rulesDest, e.name));
+      }
+      details.push(".claude/rules/ (compounding dev cycle, core standards, etc.)");
+    }
+
+    // Copy skills (full tree: skill-name/SKILL.md and supporting files)
+    const skillsSrc = path.join(extensionPath, ".cursor", "skills");
+    const skillsDest = path.join(claudeDir, "skills");
+    if (fs.existsSync(skillsSrc)) {
+      copyDirRecursive(skillsSrc, skillsDest);
+      details.push(".claude/skills/ (skills with SKILL.md)");
+    }
+
     fs.writeFileSync(claudeMdPath, buildClaudeMd(extensionPath), "utf-8");
-    details.push("CLAUDE.md (project rules)");
+    details.push(
+      isUser ? "CLAUDE.md in ~/.claude/ (project rules)" : "CLAUDE.md (project rules)"
+    );
 
     // Optional: copy hook scripts and add hooks to settings
     const hooksDest = path.join(claudeDir, "hooks");
@@ -97,6 +146,9 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
         if (!settings["$schema"]) {
           settings["$schema"] = "https://json.schemastore.org/claude-code-settings.json";
         }
+        const hookCommand = isUser
+          ? path.join(claudeDir, "hooks", "session-init.sh")
+          : "$CLAUDE_PROJECT_DIR/.claude/hooks/session-init.sh";
         (settings as { hooks?: unknown }).hooks = {
           SessionStart: [
             {
@@ -104,7 +156,7 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
               hooks: [
                 {
                   type: "command" as const,
-                  command: "$CLAUDE_PROJECT_DIR/.claude/hooks/session-init.sh",
+                  command: hookCommand,
                 },
               ],
             },
@@ -117,7 +169,9 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
 
     return {
       success: true,
-      message: "Claude Code workflow applied to this workspace.",
+      message: isUser
+        ? "Claude Code workflow applied to ~/.claude/ (all projects)."
+        : "Claude Code workflow applied to this workspace.",
       details,
     };
   } catch (err) {

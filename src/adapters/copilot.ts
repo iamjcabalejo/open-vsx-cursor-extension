@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult } from "./types";
 
@@ -49,8 +50,54 @@ function buildInstructionsMd(extensionPath: string): string {
   return parts.join("\n");
 }
 
+/** Build skills section from .cursor/skills (name + description from each SKILL.md). */
+function buildSkillsSection(extensionPath: string): string {
+  const skillsDir = path.join(extensionPath, ".cursor", "skills");
+  const parts: string[] = ["## Skills (use when relevant)", ""];
+  if (!fs.existsSync(skillsDir)) return parts.join("\n");
+  const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const skillMdPath = path.join(skillsDir, e.name, "SKILL.md");
+    if (!fs.existsSync(skillMdPath)) continue;
+    const raw = fs.readFileSync(skillMdPath, "utf-8");
+    const nameMatch = raw.match(/name:\s*(\S+)/);
+    const descMatch = raw.match(/description:\s*(.+)/);
+    const name = nameMatch ? nameMatch[1] : e.name;
+    const desc = descMatch ? descMatch[1].trim() : "";
+    parts.push(`- **${name}**: ${desc}`);
+  }
+  parts.push("");
+  return parts.join("\n");
+}
+
+/** Full user-level instructions: rules + agents + skills (for Copilot prompts folder). */
+function buildUserLevelInstructionsMd(extensionPath: string): string {
+  const rules = buildInstructionsMd(extensionPath);
+  const skillsSection = buildSkillsSection(extensionPath);
+  return [rules.trimEnd(), "", "---", "", skillsSection.trimEnd(), ""].join("\n");
+}
+
+/** User-level prompts directories for GitHub Copilot / VS Code (Code and Cursor). */
+function getUserPromptsDirs(): string[] {
+  const home = os.homedir();
+  const dirs: string[] = [];
+  if (process.platform === "darwin") {
+    dirs.push(path.join(home, "Library", "Application Support", "Code", "User", "prompts"));
+    dirs.push(path.join(home, "Library", "Application Support", "Cursor", "User", "prompts"));
+  } else if (process.platform === "win32") {
+    const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
+    dirs.push(path.join(appData, "Code", "User", "prompts"));
+    dirs.push(path.join(appData, "Cursor", "User", "prompts"));
+  } else {
+    dirs.push(path.join(home, ".config", "Code", "User", "prompts"));
+    dirs.push(path.join(home, ".config", "Cursor", "User", "prompts"));
+  }
+  return dirs;
+}
+
 /**
- * Apply workflow for GitHub Copilot: .github/copilot-instructions.md and/or AGENTS.md.
+ * Apply workflow for GitHub Copilot: user-level rules + agents + skills (prompts folder) and workspace .github/copilot-instructions.md + AGENTS.md.
  */
 export async function applyCopilot(context: AdapterContext): Promise<ApplyResult> {
   const { extensionPath, workspaceRootPath } = context;
@@ -62,6 +109,35 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
   }
   const details: string[] = [];
   try {
+    // User-level: full workflow (rules + agents + skills) so it applies to all chats in all workspaces
+    const userLevelContent = buildUserLevelInstructionsMd(extensionPath);
+    const instructionsContent = [
+      "---",
+      "name: 'Plan-Code-Review Workflow (rules, agents, skills)'",
+      "description: 'Plan → Code → Review/Test cycle, rules, agent roles, and skills'",
+      'applyTo: "**"',
+      "---",
+      "",
+      userLevelContent,
+    ].join("\n");
+    const instructionsFileName = "plan-code-review-workflow.instructions.md";
+    let userLevelWritten = 0;
+    for (const promptsDir of getUserPromptsDirs()) {
+      try {
+        if (!fs.existsSync(promptsDir)) fs.mkdirSync(promptsDir, { recursive: true });
+        const filePath = path.join(promptsDir, instructionsFileName);
+        fs.writeFileSync(filePath, instructionsContent, "utf-8");
+        userLevelWritten++;
+      } catch {
+        // Skip if we can't write (e.g. dir not used by this IDE)
+      }
+    }
+    if (userLevelWritten > 0) {
+      details.push(
+        `User-level: rules, agents, skills in prompts folder (${userLevelWritten} location(s))`
+      );
+    }
+
     const content = buildInstructionsMd(extensionPath);
 
     // .github/copilot-instructions.md (project-wide)
@@ -78,7 +154,8 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
 
     return {
       success: true,
-      message: "GitHub Copilot workflow applied to this workspace.",
+      message:
+        "GitHub Copilot workflow applied: user-level rules, agents, skills + workspace instructions.",
       details,
     };
   } catch (err) {

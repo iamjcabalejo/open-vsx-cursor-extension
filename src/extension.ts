@@ -47,7 +47,61 @@ export function activate(context: vscode.ExtensionContext): void {
     workspaceRootPath,
   };
 
-  function applyAndNotify(adapterId: AIAssistant): void {
+  /** Show picker for Claude install location; returns undefined if cancelled. */
+  async function pickClaudeInstallTarget(): Promise<"project" | "user" | undefined> {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: "Project root",
+          description: ".claude in this workspace",
+          detail: "Apply to the current project only",
+          target: "project" as const,
+        },
+        {
+          label: "User directory (~/.claude)",
+          description: "Apply to all projects",
+          detail: "Install once, use in every project",
+          target: "user" as const,
+        },
+      ],
+      {
+        title: "Where should the Claude workflow be installed?",
+        matchOnDescription: true,
+      }
+    );
+    return choice?.target;
+  }
+
+  /** Show picker for Cursor install location; returns undefined if cancelled. */
+  async function pickCursorInstallTarget(): Promise<"project" | "user" | undefined> {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: "Project root",
+          description: ".cursor in this workspace",
+          detail: "Apply to the current project only",
+          target: "project" as const,
+        },
+        {
+          label: "User directory (~/.cursor)",
+          description: "Apply to all projects",
+          detail: "Install once, use in every project",
+          target: "user" as const,
+        },
+      ],
+      {
+        title: "Where should the Cursor workflow be installed?",
+        matchOnDescription: true,
+      }
+    );
+    return choice?.target;
+  }
+
+  function applyAndNotify(
+    adapterId: AIAssistant,
+    claudeTarget?: "project" | "user",
+    cursorTarget?: "project" | "user"
+  ): void {
     const adapter = getAdapter(adapterId);
     if (!adapter) {
       vscode.window.showErrorMessage(`Unknown assistant: ${adapterId}`);
@@ -56,6 +110,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const ctx = {
       ...adapterContext,
       workspaceRootPath: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
+      ...(adapterId === "claude" && claudeTarget !== undefined && { claudeInstallTarget: claudeTarget }),
+      ...(adapterId === "cursor" && cursorTarget !== undefined && { cursorInstallTarget: cursorTarget }),
     };
     adapter.apply(ctx).then((result) => {
       if (result.success) {
@@ -74,7 +130,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const applyWorkflowCurrent = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowCurrent",
-    () => {
+    async () => {
       const recommended = recommendAssistant();
       if (!recommended) {
         vscode.window.showWarningMessage(
@@ -82,7 +138,17 @@ export function activate(context: vscode.ExtensionContext): void {
         );
         return;
       }
-      applyAndNotify(recommended);
+      if (recommended === "claude") {
+        const target = await pickClaudeInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("claude", target);
+      } else if (recommended === "cursor") {
+        const target = await pickCursorInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("cursor", undefined, target);
+      } else {
+        applyAndNotify(recommended);
+      }
     }
   );
 
@@ -102,17 +168,36 @@ export function activate(context: vscode.ExtensionContext): void {
       });
       if (!picked) return;
       const adapter = adapters.find((a) => a.name === picked.label);
-      if (adapter) applyAndNotify(adapter.id);
+      if (!adapter) return;
+      if (adapter.id === "claude") {
+        const target = await pickClaudeInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("claude", target);
+      } else if (adapter.id === "cursor") {
+        const target = await pickCursorInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("cursor", undefined, target);
+      } else {
+        applyAndNotify(adapter.id);
+      }
     }
   );
 
   const applyWorkflowCursor = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowCursor",
-    () => applyAndNotify("cursor")
+    async () => {
+      const target = await pickCursorInstallTarget();
+      if (target === undefined) return;
+      applyAndNotify("cursor", undefined, target);
+    }
   );
   const applyWorkflowClaude = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowClaude",
-    () => applyAndNotify("claude")
+    async () => {
+      const target = await pickClaudeInstallTarget();
+      if (target === undefined) return;
+      applyAndNotify("claude", target);
+    }
   );
   const applyWorkflowCopilot = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowCopilot",

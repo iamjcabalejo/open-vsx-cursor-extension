@@ -55,14 +55,14 @@ So the developer guide reason is: **we don’t add a `.claude` folder to the rep
 ## 5. How adapters work
 
 - **Detection** (`src/adapters/detect.ts`) — Determines which AI assistants are available (Cursor app name, or extensions like `Anthropic.claude-code`, `GitHub.copilot`, `openai.chatgpt`).
-- **Apply** — Each adapter receives `AdapterContext`: `extensionPath` (where the extension is installed) and `workspaceRootPath` (the first workspace folder). It reads from `extensionPath/.cursor/` (and optionally `.cursor-plugin/`) and writes into `workspaceRootPath` (e.g. `.claude/`, `CLAUDE.md`, `.github/`, `AGENTS.md`, `.agents/`).
+- **Apply** — Each adapter receives `AdapterContext`: `extensionPath` (where the extension is installed), `workspaceRootPath` (the first workspace folder), and for Claude optionally `claudeInstallTarget` (`"project"` or `"user"`). It reads from `extensionPath/.cursor/` (and optionally `.cursor-plugin/`) and writes into `workspaceRootPath` (e.g. `.claude/`, `CLAUDE.md`, `.github/`, `AGENTS.md`, `.agents/`) or, for Claude with `claudeInstallTarget === "user"`, into `~/.claude/`.
 
 So:
 
 - **Cursor adapter** — Copies `extensionPath/.cursor` and `extensionPath/.cursor-plugin` into `workspaceRootPath`.
-- **Claude adapter** — Creates `workspaceRootPath/.claude/agents/` (from `.cursor/agents`), `workspaceRootPath/CLAUDE.md` (from `.cursor/rules`), and optionally `.claude/hooks/` and `.claude/settings.json`. The layout follows **Claude Code’s official project pattern**: project scope uses `.claude/settings.json` (with `$schema`), `.claude/agents/` for subagents (Markdown + YAML frontmatter), and `CLAUDE.md` at repo root (or `.claude/CLAUDE.md`). Hook commands use `$CLAUDE_PROJECT_DIR/.claude/hooks/…` so they resolve correctly when the working directory changes.
-- **Copilot adapter** — Writes `workspaceRootPath/.github/copilot-instructions.md` and `workspaceRootPath/AGENTS.md` from rules + agent summaries.
-- **Codex adapter** — Syncs `extensionPath/.cursor/skills` to `~/.codex/skills` and writes `workspaceRootPath/AGENTS.md`. Does not create `.agents/skills` in the workspace.
+- **Claude adapter** — When **project**: creates `workspaceRootPath/.claude/agents/` (from `.cursor/agents`), `workspaceRootPath/.claude/rules/` (from `.cursor/rules`; includes compounding dev cycle), `workspaceRootPath/.claude/skills/` (from `.cursor/skills`), `workspaceRootPath/CLAUDE.md` (from `.cursor/rules`), and optionally `.claude/hooks/` and `.claude/settings.json`. When **user** (chosen via QuickPick at apply time): same structure under `~/.claude/` (e.g. `~/.claude/agents/`, `~/.claude/rules/`, `~/.claude/skills/`, `~/.claude/CLAUDE.md`), so the workflow applies to all projects. The layout follows **Claude Code’s official project/user scope**: project scope uses `.claude/settings.json` and `CLAUDE.md` at repo root; user scope uses `~/.claude/settings.json` and `~/.claude/CLAUDE.md`. Claude Code also loads modular rules from `.claude/rules/` and skills from `.claude/skills/`. Hook commands use `$CLAUDE_PROJECT_DIR/.claude/hooks/…` for project scope and an absolute path to `~/.claude/hooks/…` for user scope.
+- **Copilot adapter** — Writes **user-level** instructions: **rules, agents, and skills** to the VS Code/Cursor **prompts** folder as `plan-code-review-workflow.instructions.md` (applyTo: `"**"`) so they apply to all chats in all workspaces. Also writes `workspaceRootPath/.github/copilot-instructions.md` and `workspaceRootPath/AGENTS.md` from the same content (for project sharing / version control).
+- **Codex adapter** — Writes **user-level** **~/.codex/AGENTS.md** with the compounding dev cycle so it applies in all projects. Syncs `extensionPath/.cursor/skills` to `~/.codex/skills`. Writes `workspaceRootPath/AGENTS.md` (full rules + agent summaries). Does not create `.agents/skills` in the workspace.
 
 All of this happens in the user’s workspace when they run the command; nothing in the repo is a pre-built `.claude` or Copilot/Codex tree.
 
@@ -90,7 +90,7 @@ All of this happens in the user’s workspace when they run the command; nothing
 |----------|--------|
 | Why is there no `.claude` in the repo? | `.claude` is generated in the user’s workspace by the Claude adapter; the repo only holds the adapter code and the canonical `.cursor/` content. |
 | Why must `.cursor` be in the extension package? | Adapters read from `extensionPath/.cursor/` to generate assistant-specific files; if `.cursor` is excluded via `.vscodeignore`, the package has no workflow and apply commands fail. |
-| Where does `.claude` get created? | In the first workspace folder’s root when the user runs **Apply workflow for Claude Code**. The structure matches Claude Code’s project scope: `.claude/settings.json`, `.claude/agents/`, `.claude/hooks/`, and `CLAUDE.md` at root. |
+| Where does `.claude` get created? | When you run **Apply workflow for Claude Code**, you choose: **project root** (first workspace folder: `.claude/`, `CLAUDE.md`) or **user directory** (`~/.claude/`). Both use the same structure: `.claude/agents/`, `.claude/rules/`, `.claude/skills/`, `.claude/settings.json`, `.claude/hooks/`, and `CLAUDE.md` (at project root or inside `~/.claude/`). |
 | Can I add a pre-built `.claude` for convenience? | Not recommended; it would duplicate and can drift from `.cursor/`. Prefer improving the Claude adapter so it generates everything needed from `.cursor/`. |
 
 ---

@@ -8,6 +8,10 @@ export interface AdapterContext {
   extensionPath: string;
   /** Workspace root path, or undefined if no folder open. */
   workspaceRootPath: string | undefined;
+  /** When applying Claude workflow: install in project (.claude) or user dir (~/.claude). */
+  claudeInstallTarget?: "project" | "user";
+  /** When applying Cursor workflow: install in project (.cursor) or user dir (~/.cursor). */
+  cursorInstallTarget?: "project" | "user";
 }
 
 export interface ApplyResult {

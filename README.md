@@ -43,6 +43,8 @@ AI can write code fast—but without a clear plan and review loop, you get scope
    - **Plan-Code-Review: Apply workflow for… (choose AI)** — pick Cursor, Claude Code, Copilot, or Codex
    - Or a specific command: **Plan-Code-Review: Apply workflow for Cursor** / **Claude Code** / **GitHub Copilot** / **Codex**
 
+For **Claude Code**, you’ll be asked whether to install in the **project root** (`.claude` in this workspace) or in your **user directory** (`~/.claude/`, so the workflow applies to all projects).
+
 **Cursor users:** Install the extension in VS Code, open your project there, run **Plan-Code-Review: Apply workflow for Cursor**, then switch to Cursor and open the same project—you get full slash commands and agents. No Cursor plugin install needed until the plugin is approved.
 
 The extension writes the right files into your workspace. Your AI assistant uses them automatically.
@@ -50,9 +52,9 @@ The extension writes the right files into your workspace. Your AI assistant uses
 | Assistant     | What gets created |
 |---------------|-------------------|
 | **Cursor**    | `.cursor/`, `.cursor-plugin/` — full slash commands, agents, rules, hooks |
-| **Claude Code** | `.claude/agents/`, `CLAUDE.md`, `.claude/hooks/` |
-| **GitHub Copilot** | `.github/copilot-instructions.md`, `AGENTS.md` |
-| **Codex**     | `~/.codex/skills/` (synced from extension), `AGENTS.md` |
+| **Claude Code** | `.claude/agents/`, `.claude/rules/`, `.claude/skills/`, `CLAUDE.md`, `.claude/hooks/` — in project root **or** in `~/.claude/` (you choose when applying) |
+| **GitHub Copilot** | User-level: **rules, agents, skills** in **prompts** folder (all workspaces). Workspace: `.github/copilot-instructions.md`, `AGENTS.md` |
+| **Codex**     | User-level: **~/.codex/AGENTS.md** (compounding dev cycle) + **~/.codex/skills/** (synced). Workspace: `AGENTS.md` |
 
 **Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. “Follow CLAUDE.md”, “Use the code-review skill”).
 

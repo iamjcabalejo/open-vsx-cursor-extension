@@ -1,7 +1,9 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult } from "./types";
 import { syncSkillsToCodexFromSource } from "../installCodexSkills";
+import { buildCompoundingDevCycleContent } from "../compoundingDevCycle";
 
 function buildAgentsMd(extensionPath: string): string {
   const rulesDir = path.join(extensionPath, ".cursor", "rules");
@@ -85,13 +87,33 @@ export async function applyCodex(context: AdapterContext): Promise<ApplyResult> 
       details.push(...syncResult.details.slice(1));
     }
 
+    // User-level AGENTS.md: impose compounding dev cycle for all projects (Codex merges global + project)
+    const codexUserDir = path.join(os.homedir(), ".codex");
+    if (!fs.existsSync(codexUserDir)) fs.mkdirSync(codexUserDir, { recursive: true });
+    const userAgentsPath = path.join(codexUserDir, "AGENTS.md");
+    const userAgentsContent = [
+      "# Plan-Code-Review workflow (user-level)",
+      "",
+      "Apply the compounding dev cycle in every project. Project-level AGENTS.md adds rules and agents for this repo.",
+      "",
+      "---",
+      "",
+      buildCompoundingDevCycleContent(extensionPath),
+      "",
+      "---",
+      "*User-level rules from Plan-Code-Review Workflow extension.*",
+    ].join("\n");
+    fs.writeFileSync(userAgentsPath, userAgentsContent, "utf-8");
+    details.push("~/.codex/AGENTS.md (compounding dev cycle at user level)");
+
     const agentsMdPath = path.join(workspaceRootPath, "AGENTS.md");
     fs.writeFileSync(agentsMdPath, buildAgentsMd(extensionPath), "utf-8");
-    details.push("AGENTS.md (rules + agent summaries)");
+    details.push("AGENTS.md in workspace (rules + agent summaries)");
 
     return {
       success: true,
-      message: "Codex workflow applied to this workspace.",
+      message:
+        "Codex workflow applied: user-level compounding dev cycle + workspace AGENTS.md.",
       details,
     };
   } catch (err) {
