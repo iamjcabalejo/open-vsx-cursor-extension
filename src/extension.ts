@@ -127,7 +127,7 @@ export function activate(context: vscode.ExtensionContext): void {
     "plan-code-review-workflow.installCodexSkills",
     () => {
       const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-      const result = installCodexSkills(workspaceRootPath);
+      const result = installCodexSkills(workspaceRootPath, basePath);
       if (result.success) {
         const detail = result.details?.length ? "\n" + result.details.join("\n") : "";
         vscode.window.showInformationMessage(result.message + detail, { modal: false });

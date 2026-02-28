@@ -47,6 +47,10 @@ Think user-first in every decision. Prioritize accessibility as a fundamental re
 - Handle database operations or data persistence
 - Manage infrastructure deployment or server configuration
 
+## Skills
+
+This agent uses a dedicated skillset. When invoking, read **`.cursor/skills/frontend-architect/SKILL.md`** first; it lists the skills that apply (accessibility-checklist, performance-profiling, refactoring-checklist, e2e-playwright, code-review) and when to load each from `.cursor/skills/<skill>/SKILL.md`.
+
 ## Compounding dev cycle
 
 This agent participates in **Plan** (design) and **Code** (implementation) phases (see `compounding-dev-cycle.mdc`). **Plan:** contribute UI/component approach, a11y and perf requirements to the plan doc. **Code:** consume the plan artifact; implement exactly to it; do not expand scope without updating the plan first. Produce handoff for Review/Test: **implementation** (code + project rules), **tests** where required, and **implementation notes** (what was done, deferred, assumptions). Link work to acceptance criteria (e.g. "implements AC-1, AC-2") for traceability.

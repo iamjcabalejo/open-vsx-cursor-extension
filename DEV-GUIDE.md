@@ -20,7 +20,7 @@ So there is **one source of truth** (`.cursor/` and `.cursor-plugin/`) and **gen
 We **do not** commit `.claude/`, `.github/copilot-instructions.md`, `.agents/`, or user-specific `AGENTS.md` to this repo because:
 
 - **Single source of truth** — The canonical workflow lives in `.cursor/` and `.cursor-plugin/`. Claude-, Copilot-, and Codex-specific layout is **derived** from that. Adding `.claude/` to the repo would duplicate content and create two sources of truth that can drift.
-- **Generated on demand** — The extension **generates** `.claude/`, `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md`, `.agents/skills/`, etc. when the user runs **Apply workflow for Claude Code** (or Copilot, Codex, Cursor). Those files are written into the **user’s workspace**, not into the extension repo.
+- **Generated on demand** — The extension **generates** `.claude/`, `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md`, etc. when the user runs **Apply workflow for Claude Code** (or Copilot, Codex, Cursor). For Codex, `.agents/skills/` is no longer created; skills sync to `~/.codex/skills`. Other generated files are written into the **user’s workspace**, not into the extension repo.
 - **Workspace-owned** — Those files are meant to live in the project the user is working on, so they can be committed there, shared with the team, or gitignored as needed. They don’t belong in the extension’s own repo.
 - **No stale copies** — If we shipped a pre-built `.claude/` in the extension, it would be a snapshot. Generating from `.cursor/` at apply-time keeps Claude (and others) in sync with the current rules and agents.
 
@@ -62,7 +62,7 @@ So:
 - **Cursor adapter** — Copies `extensionPath/.cursor` and `extensionPath/.cursor-plugin` into `workspaceRootPath`.
 - **Claude adapter** — Creates `workspaceRootPath/.claude/agents/` (from `.cursor/agents`), `workspaceRootPath/CLAUDE.md` (from `.cursor/rules`), and optionally `.claude/hooks/` and `.claude/settings.json`. The layout follows **Claude Code’s official project pattern**: project scope uses `.claude/settings.json` (with `$schema`), `.claude/agents/` for subagents (Markdown + YAML frontmatter), and `CLAUDE.md` at repo root (or `.claude/CLAUDE.md`). Hook commands use `$CLAUDE_PROJECT_DIR/.claude/hooks/…` so they resolve correctly when the working directory changes.
 - **Copilot adapter** — Writes `workspaceRootPath/.github/copilot-instructions.md` and `workspaceRootPath/AGENTS.md` from rules + agent summaries.
-- **Codex adapter** — Writes `workspaceRootPath/.agents/skills/` (from `.cursor/skills`) and `workspaceRootPath/AGENTS.md`.
+- **Codex adapter** — Syncs `extensionPath/.cursor/skills` to `~/.codex/skills` and writes `workspaceRootPath/AGENTS.md`. Does not create `.agents/skills` in the workspace.
 
 All of this happens in the user’s workspace when they run the command; nothing in the repo is a pre-built `.claude` or Copilot/Codex tree.
 

@@ -8,7 +8,7 @@ export interface InstallCodexSkillsResult {
   success: boolean;
   message: string;
   details?: string[];
-  /** Names of skills that were installed (or skipped if dry run). */
+  /** Names of skills that were installed or updated. */
   installed?: string[];
   /** Names of skills skipped (missing SKILL.md). */
   skipped?: string[];
@@ -34,51 +34,49 @@ function copyDirRecursive(srcDir: string, destDir: string): void {
   }
 }
 
+const CODEX_SKILLS_ROOT = path.join(os.homedir(), ".codex", "skills");
+
 /**
- * Install skills from workspace .agents/skills to ~/.codex/skills/<skill-name>.
- * Each subfolder of .agents/skills must contain SKILL.md; others are skipped.
+ * Sync skill folders from a source directory to ~/.codex/skills.
+ * Each subfolder must contain SKILL.md; others are skipped.
+ * Existing skills with the same name are overwritten (updated).
+ * Use this for both "Apply workflow for Codex" and "Install skills to Codex".
  */
-export function installCodexSkills(workspaceRootPath: string | undefined): InstallCodexSkillsResult {
-  if (!workspaceRootPath) {
+export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexSkillsResult {
+  if (!fs.existsSync(skillsSrcDir)) {
     return {
       success: false,
-      message: "No workspace folder open. Open a folder first, then run the command again.",
+      message: `Skills source folder not found: ${skillsSrcDir}`,
+      details: [skillsSrcDir],
     };
   }
 
-  const skillsSrc = path.join(workspaceRootPath, ".agents", "skills");
-  if (!fs.existsSync(skillsSrc)) {
-    return {
-      success: false,
-      message: "No .agents/skills folder in this workspace. Run \"Apply workflow for Codex\" first to generate it.",
-      details: [skillsSrc],
-    };
-  }
-
-  const codexSkillsRoot = path.join(os.homedir(), ".codex", "skills");
   const installed: string[] = [];
   const skipped: string[] = [];
 
   let entries: fs.Dirent[];
   try {
-    entries = fs.readdirSync(skillsSrc, { withFileTypes: true });
+    entries = fs.readdirSync(skillsSrcDir, { withFileTypes: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return {
       success: false,
-      message: `Failed to read .agents/skills: ${message}`,
+      message: `Failed to read skills source: ${message}`,
     };
   }
 
   for (const e of entries) {
     if (!e.isDirectory()) continue;
-    const skillPath = path.join(skillsSrc, e.name);
+    const skillPath = path.join(skillsSrcDir, e.name);
     const skillMdPath = path.join(skillPath, "SKILL.md");
     if (!fs.existsSync(skillMdPath)) {
       skipped.push(e.name);
       continue;
     }
-    const destPath = path.join(codexSkillsRoot, e.name);
+    const destPath = path.join(CODEX_SKILLS_ROOT, e.name);
+    if (fs.existsSync(destPath)) {
+      fs.rmSync(destPath, { recursive: true });
+    }
     try {
       copyDirRecursive(skillPath, destPath);
       installed.push(e.name);
@@ -97,15 +95,15 @@ export function installCodexSkills(workspaceRootPath: string | undefined): Insta
   if (installed.length === 0 && skipped.length === 0) {
     return {
       success: true,
-      message: "No skill folders found in .agents/skills.",
-      details: [skillsSrc],
+      message: "No skill folders found in source.",
+      details: [skillsSrcDir],
       installed: [],
       skipped: [],
     };
   }
 
   const details: string[] = [
-    `Installed to ${codexSkillsRoot}`,
+    `Synced to ${CODEX_SKILLS_ROOT}`,
     ...installed.map((name) => `  - ${name}`),
   ];
   if (skipped.length > 0) {
@@ -122,4 +120,39 @@ export function installCodexSkills(workspaceRootPath: string | undefined): Insta
     installed,
     skipped,
   };
+}
+
+/**
+ * Install skills to ~/.codex/skills.
+ * - If extensionPath is provided: sync from extensionPath/.cursor/skills (one-step, no .agents/skills).
+ * - Otherwise: sync from workspaceRootPath/.agents/skills (legacy; run "Apply workflow for Codex" to sync from extension).
+ * Each subfolder must contain SKILL.md; others are skipped.
+ */
+export function installCodexSkills(
+  workspaceRootPath: string | undefined,
+  extensionPath?: string
+): InstallCodexSkillsResult {
+  const skillsSrc = extensionPath
+    ? path.join(extensionPath, ".cursor", "skills")
+    : workspaceRootPath
+      ? path.join(workspaceRootPath, ".agents", "skills")
+      : undefined;
+
+  if (!skillsSrc) {
+    return {
+      success: false,
+      message: "No workspace folder open. Open a folder first, then run the command again.",
+    };
+  }
+
+  if (!extensionPath && !fs.existsSync(skillsSrc)) {
+    return {
+      success: false,
+      message:
+        'No .agents/skills folder in this workspace. Use "Apply workflow for Codex" to sync skills from the extension to ~/.codex/skills.',
+      details: [skillsSrc],
+    };
+  }
+
+  return syncSkillsToCodexFromSource(skillsSrc);
 }

@@ -52,7 +52,7 @@ Example summary for sharing (align with your current `plugin.json` version and d
 {
   "name": "plan-code-review-workflow",
   "description": "Apply the Plan → Code → Review cycle: 15 commands, 17 AI agents, 14 skills, 6 rules, and hooks for Cursor, Claude Code, Copilot, or Codex",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "author": "Jhon Cabalejo"
 }
 ```
@@ -182,7 +182,7 @@ npm run compile
 vsce package
 ```
 
-This produces `plan-code-review-workflow-4.0.3.vsix`. You can install it locally via **Extensions** → **Views and More Actions** → **Install from VSIX...**.
+This produces `plan-code-review-workflow-4.0.4.vsix`. You can install it locally via **Extensions** → **Views and More Actions** → **Install from VSIX...**.
 
 ### Publish
 

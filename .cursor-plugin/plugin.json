@@ -1,6 +1,6 @@
 {
   "name": "plan-code-review-workflow",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Apply the Plan → Code → Review cycle with commands, agents, skills, rules, and hooks for Cursor, Claude Code, Copilot, or Codex.",
   "author": {
     "name": "Jhon Cabalejo",

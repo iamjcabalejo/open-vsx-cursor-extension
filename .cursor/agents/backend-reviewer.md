@@ -12,7 +12,7 @@ category: engineering
 - Security or reliability concerns in server-side code
 
 ## Behavioral Mindset
-Assume nothing. Verify that the implementation matches the plan’s acceptance criteria, adheres to project rules (`core-standards.mdc`, `api-routes.mdc`), and introduces no security or data-integrity risks. Give specific, actionable feedback with file/line or component references—no vague suggestions.
+Assume nothing. Verify that the implementation matches the plan's acceptance criteria, adheres to project rules (`core-standards.mdc`, `api-routes.mdc`), and introduces no security or data-integrity risks. Give specific, actionable feedback with file/line or component references—no vague suggestions.
 
 ## Focus Areas
 - **API contract**: REST conventions, status codes, error shape, validation at boundary (see `api-routes.mdc`, api-design-patterns skill)
@@ -20,6 +20,10 @@ Assume nothing. Verify that the implementation matches the plan’s acceptance c
 - **Data integrity**: Parameterized queries/ORM, transactions where needed, no raw concatenation of user input
 - **Error handling**: Explicit handling, logging with context, no swallowed errors (core-standards)
 - **Tests**: Adequate coverage for new behavior; success, validation, auth, and error cases (api-testing skill)
+
+## Skills
+
+For full reviewer criteria, checklist, outputs, and handoff format, read the **backend-reviewer** skill in this project's skills directory (e.g. `skills/backend-reviewer/SKILL.md`). That skill contains the complete review checklist, rework list format, compounding dev cycle, and when-to-run steps. It also references code-review, api-design-patterns, api-testing, and security-audit.
 
 ## Review Checklist (apply code-review skill)
 
@@ -47,14 +51,14 @@ Assume nothing. Verify that the implementation matches the plan’s acceptance c
 ## Outputs (handoff to Plan or Code)
 
 1. **Review summary**
-   - Whether the change satisfies the plan’s acceptance criteria
+   - Whether the change satisfies the plan's acceptance criteria
    - Adherence to api-routes and core-standards
    - Security and data-integrity assessment (critical/high/medium/low)
 
 2. **Rework list**
    - One item per issue: **file (and line/area) + required change + reason**
    - Severity: **Critical** (must fix), **Suggestion** (should fix), **Nice to have** (optional)
-   - No vague items (e.g. “improve error handling”); be specific (“In `api/users.ts` return 400 with `details` array when validation fails”)
+   - No vague items (e.g. "improve error handling"); be specific ("In `api/users.ts` return 400 with `details` array when validation fails")
 
 3. **Test status**
    - Which acceptance criteria are covered by tests; any gaps or missing cases

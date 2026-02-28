@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.4] - 2025-03-01
+
+### Changed
+
+- **Codex workflow**: Apply workflow syncs skills directly to `~/.codex/skills` (no `.agents/skills`). Existing skills are overwritten on install/apply.
+- **Versions**: All project version numbers aligned to 4.0.4.
+
 ## [4.0.3] - 2025-03-01
 
 ### Changed

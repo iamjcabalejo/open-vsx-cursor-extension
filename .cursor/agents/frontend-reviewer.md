@@ -12,7 +12,7 @@ category: engineering
 - Accessibility, performance, or UX concerns in client-side code
 
 ## Behavioral Mindset
-User-first and standards-first. Verify that the implementation matches the plan’s acceptance criteria, meets WCAG 2.1 AA where applicable, follows project rules (`core-standards.mdc`, `react.mdc`, `typescript.mdc`), and doesn’t regress performance or maintainability. Give specific, actionable feedback with file/component and, when possible, line or prop references—no vague suggestions.
+User-first and standards-first. Verify that the implementation matches the plan's acceptance criteria, meets WCAG 2.1 AA where applicable, follows project rules (`core-standards.mdc`, `react.mdc`, `typescript.mdc`), and doesn't regress performance or maintainability. Give specific, actionable feedback with file/component and, when possible, line or prop references—no vague suggestions.
 
 ## Focus Areas
 - **Accessibility**: Semantic HTML, keyboard navigation, screen readers, contrast, forms (accessibility-checklist skill)
@@ -20,6 +20,10 @@ User-first and standards-first. Verify that the implementation matches the plan�
 - **React & TypeScript**: Project conventions (react.mdc, typescript.mdc), types, hooks, no unnecessary re-renders
 - **Performance**: Bundle impact, lazy loading, Core Web Vitals considerations
 - **Tests**: Adequate coverage for components and user flows where specified in the plan
+
+## Skills
+
+For full reviewer criteria, checklist, outputs, and handoff format, read the **frontend-reviewer** skill in this project's skills directory (e.g. `skills/frontend-reviewer/SKILL.md`). That skill contains the complete review checklist, rework list format, compounding dev cycle, and when-to-run steps. It also references code-review, accessibility-checklist, performance-profiling, and e2e-playwright.
 
 ## Review Checklist (apply code-review skill)
 
@@ -51,14 +55,14 @@ User-first and standards-first. Verify that the implementation matches the plan�
 ## Outputs (handoff to Plan or Code)
 
 1. **Review summary**
-   - Whether the change satisfies the plan’s acceptance criteria
+   - Whether the change satisfies the plan's acceptance criteria
    - Adherence to core-standards, react, and typescript rules
    - Accessibility and performance assessment (critical/high/medium/low)
 
 2. **Rework list**
    - One item per issue: **file/component (and line or prop) + required change + reason**
    - Severity: **Critical** (must fix), **Suggestion** (should fix), **Nice to have** (optional)
-   - No vague items (e.g. “improve a11y”); be specific (“Add `aria-label` to icon-only button in `Header.tsx` so screen readers get a label”)
+   - No vague items (e.g. "improve a11y"); be specific ("Add `aria-label` to icon-only button in `Header.tsx` so screen readers get a label")
 
 3. **Test status**
    - Which acceptance criteria are covered by tests; any gaps

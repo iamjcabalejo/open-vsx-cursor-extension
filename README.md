@@ -52,7 +52,7 @@ The extension writes the right files into your workspace. Your AI assistant uses
 | **Cursor**    | `.cursor/`, `.cursor-plugin/` — full slash commands, agents, rules, hooks |
 | **Claude Code** | `.claude/agents/`, `CLAUDE.md`, `.claude/hooks/` |
 | **GitHub Copilot** | `.github/copilot-instructions.md`, `AGENTS.md` |
-| **Codex**     | `.agents/skills/`, `AGENTS.md` |
+| **Codex**     | `~/.codex/skills/` (synced from extension), `AGENTS.md` |
 
 **Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. “Follow CLAUDE.md”, “Use the code-review skill”).
 

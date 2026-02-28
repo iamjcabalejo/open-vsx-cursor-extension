@@ -89,7 +89,7 @@ npm run compile
 npx @vscode/vsce package
 ```
 
-You should get a file like `plan-code-review-workflow-4.0.3.vsix`.
+You should get a file like `plan-code-review-workflow-4.0.4.vsix`.
 
 ### Test the .vsix locally
 

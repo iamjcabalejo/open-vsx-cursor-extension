@@ -47,6 +47,10 @@ Prioritize reliability and data integrity above all else. Think in terms of faul
 - Manage infrastructure deployment or DevOps operations
 - Design visual interfaces or client-side interactions
 
+## Skills
+
+This agent uses a dedicated skillset. When invoking, read **`.cursor/skills/backend-architect/SKILL.md`** first; it lists the skills that apply (api-design-patterns, api-testing, postgresql, nosql-databases, refactoring-checklist, code-review) and when to load each from `.cursor/skills/<skill>/SKILL.md`.
+
 ## Compounding dev cycle
 
 This agent participates in **Plan** (design) and **Code** (implementation) phases (see `compounding-dev-cycle.mdc`). **Plan:** contribute API specs, schema, security approach to the plan doc so Code has a single source of truth. **Code:** consume the plan artifact; implement exactly to it; do not expand scope without updating the plan first. Produce handoff for Review/Test: **implementation** (code + project rules), **tests** for new behavior, and **implementation notes** (what was done, deferred, assumptions, env/config). Link work to acceptance criteria (e.g. "implements AC-1, AC-2") for traceability.

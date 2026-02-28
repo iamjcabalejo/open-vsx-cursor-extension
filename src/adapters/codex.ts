@@ -1,29 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import type { AdapterContext, ApplyResult } from "./types";
-
-const SKIP_DIRS = new Set([".git", "node_modules", "references"]);
-
-function copySkillsRecursive(srcDir: string, destDir: string): string[] {
-  const copied: string[] = [];
-  if (!fs.existsSync(srcDir)) return copied;
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
-  for (const e of entries) {
-    const srcPath = path.join(srcDir, e.name);
-    const destPath = path.join(destDir, e.name);
-    if (e.isDirectory()) {
-      if (SKIP_DIRS.has(e.name)) continue;
-      copied.push(...copySkillsRecursive(srcPath, destPath));
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-      copied.push(path.relative(destDir, destPath));
-    }
-  }
-  return copied;
-}
+import { syncSkillsToCodexFromSource } from "../installCodexSkills";
 
 function buildAgentsMd(extensionPath: string): string {
   const rulesDir = path.join(extensionPath, ".cursor", "rules");
@@ -74,7 +52,8 @@ function buildAgentsMd(extensionPath: string): string {
 }
 
 /**
- * Apply workflow for Codex: .agents/skills (from .cursor/skills) and AGENTS.md.
+ * Apply workflow for Codex: sync .cursor/skills to ~/.codex/skills and write AGENTS.md.
+ * Does not create .agents/skills; skills are synced directly to Codex.
  */
 export async function applyCodex(context: AdapterContext): Promise<ApplyResult> {
   const { extensionPath, workspaceRootPath } = context;
@@ -93,12 +72,18 @@ export async function applyCodex(context: AdapterContext): Promise<ApplyResult> 
   }
   const details: string[] = [];
   try {
-    // Codex uses .agents/skills at repo root
-    const agentsDir = path.join(workspaceRootPath, ".agents");
-    const skillsDest = path.join(agentsDir, "skills");
-    if (!fs.existsSync(skillsDest)) fs.mkdirSync(skillsDest, { recursive: true });
-    copySkillsRecursive(skillsSrc, skillsDest);
-    details.push(".agents/skills/ (from .cursor/skills)");
+    const syncResult = syncSkillsToCodexFromSource(skillsSrc);
+    if (!syncResult.success) {
+      return {
+        success: false,
+        message: syncResult.message,
+        details: syncResult.details,
+      };
+    }
+    details.push("~/.codex/skills/ (synced from .cursor/skills)");
+    if (syncResult.details?.length) {
+      details.push(...syncResult.details.slice(1));
+    }
 
     const agentsMdPath = path.join(workspaceRootPath, "AGENTS.md");
     fs.writeFileSync(agentsMdPath, buildAgentsMd(extensionPath), "utf-8");
