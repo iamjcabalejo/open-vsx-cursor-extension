@@ -2,7 +2,7 @@
   "name": "payoys-cursor-sub-agents",
   "displayName": "Payoy's Cursor Sub-Agents Setup",
   "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Use with Cursor, Claude Code, GitHub Copilot, or Codex—apply the right workflow for your AI assistant.",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {

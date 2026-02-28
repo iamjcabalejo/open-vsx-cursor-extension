@@ -12,7 +12,7 @@
       "name": "payoys-cursor-sub-agents",
       "source": ".",
       "description": "Personal Cursor Agents setup with commands, agents, skills, rules, and hooks for modern web development.",
-      "version": "4.0.1",
+      "version": "4.0.2",
       "author": {
         "name": "Brader Payoy",
         "email": "iamjcabalejo@gmail.com"

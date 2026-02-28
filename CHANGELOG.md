@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2] - 2025-03-01
+
+### Changed
+
+- README: shortened and reorganized; emphasis on compounding dev cycle and "Why install?" section.
+- README: Cursor IDE install clarified—plugin pending approval; use VS Code + Apply workflow for Cursor, then open project in Cursor.
+
 ## [4.0.1] - 2025-03-01
 
 ### Added
