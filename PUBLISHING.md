@@ -152,7 +152,7 @@ For major versions, create GitHub releases:
 
 ## Publishing as a VS Code Extension
 
-This repo is also a VS Code extension so you can publish it to the **VS Code Marketplace** and **Open VSX** (used by Cursor’s extension marketplace).
+This repo is also a VS Code extension so you can publish it to the **VS Code Marketplace** and **Open VSX** (used by Cursor’s extension marketplace). **For full step-by-step instructions, see [VSCODE-EXTENSION-PUBLISHING.md](VSCODE-EXTENSION-PUBLISHING.md).**
 
 ### Prerequisites
 
