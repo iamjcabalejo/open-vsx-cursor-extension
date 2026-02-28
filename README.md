@@ -2,6 +2,8 @@
 
 **Payoy's Cursor Sub-Agents** is available as a **VS Code extension** (VS Code Marketplace & Open VSX) and as a **Cursor plugin** (install from GitHub). This README describes the full setup; the extension surfaces the guide and publishing docs inside VS Code and Cursor.
 
+**Use with any AI assistant:** The extension can apply this workflow (rules, agents, skills, commands, hooks) to **Cursor**, **Claude Code**, **GitHub Copilot**, or **Codex**. Open the Command Palette and run **Payoy's Setup: Apply workflow for current AI** (auto-detects) or **Payoy's Setup: Apply workflow for… (choose AI)** to pick one. Each assistant gets the right config (e.g. `.cursor/` for Cursor, `.claude/agents` + `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` and `AGENTS.md` for Copilot, `.agents/skills` + `AGENTS.md` for Codex).
+
 This plugin provides **15 slash commands**, **17 specialized AI agents**, **14 project skills**, **6 rules**, and **hooks** for trigger-based automation. At its core is a **compounding development cycle** that turns feature ideas into production-ready code with clear handoffs, automated code review, and a loop until quality gates pass.
 
 ## Why the compounding development cycle?
@@ -218,7 +220,7 @@ This setup emphasizes:
 
 ## Installation
 
-**As a VS Code extension:** Install **Payoy's Cursor Sub-Agents** from the [VS Code Marketplace](https://marketplace.visualstudio.com/) or [Open VSX](https://open-vsx.org/) (Cursor’s extension source). You get the commands *Open Guide* and *Open Publishing Guide* plus this README in the extension details.
+**As a VS Code extension:** Install **Payoy's Cursor Sub-Agents** from the [VS Code Marketplace](https://marketplace.visualstudio.com/) or [Open VSX](https://open-vsx.org/) (Cursor’s extension source). You get the commands *Open Guide* and *Open Publishing Guide*; **Apply workflow for current AI** or **Apply workflow for… (choose AI)** to apply this workflow to Cursor, Claude Code, Copilot, or Codex; plus this README in the extension details.
 
 **As a Cursor plugin (full setup):**
 
@@ -296,6 +298,8 @@ Run `chmod + x .cursor/hooks/*.sh` after installation.
 After installation, you can customize any command by editing files in `.cursor/commands/` and `.cursor/agents/`. Add or modify skills in `.cursor/skills/`, rules in `.cursor/rules/`, and hooks in `.cursor/hooks.json` to extend agent capabilities.
 
 ## Contributing
+
+**Developers:** See **DEV-GUIDE.md** for how the extension is set up (e.g. why we don’t add a `.claude` folder to the repo, packaging, adapters). Open it via the command **Payoy's Setup: Open Developer Guide**.
 
 Feel free to:
 - Fork and customize for your needs

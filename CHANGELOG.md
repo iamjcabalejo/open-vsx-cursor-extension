@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.0] - 2025-03-01
+
+### Added
+
+- **DEV-GUIDE.md** — Developer guide: why we don't add `.claude` to the repo, packaging (`.vscodeignore`), how adapters work, testing and releasing.
+- Command: **Payoy's Setup: Open Developer Guide** — opens DEV-GUIDE.md.
+
+### Changed
+
+- Version bump to 4.0.0 (multi-AI workflow, adapters, dev guide).
+
+## [3.2.0] - 2025-03-01
+
+### Added
+
+- Apply workflow for any AI assistant: Cursor, Claude Code, GitHub Copilot, Codex. Commands: **Apply workflow for current AI**, **Apply workflow for… (choose AI)**, and per-assistant commands (Cursor, Claude Code, Copilot, Codex). Each writes the right config (e.g. `.cursor/`, `.claude/`, `.github/copilot-instructions.md`, `.agents/skills`, `AGENTS.md`).
+
+### Changed
+
+- Extension description updated to mention use with Cursor, Claude Code, GitHub Copilot, and Codex.
+
 ## [3.1.0] - 2025-02-28
 
 ### Added

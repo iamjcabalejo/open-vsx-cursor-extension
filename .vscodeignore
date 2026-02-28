@@ -7,8 +7,7 @@ node_modules
 !README.md
 !PUBLISHING.md
 !CHANGELOG.md
-.cursor/**
-.cursor-plugin/**
+!DEV-GUIDE.md
 docs/**
 **/*.map
 **/.git/**

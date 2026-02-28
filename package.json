@@ -1,8 +1,8 @@
 {
   "name": "payoys-cursor-sub-agents",
   "displayName": "Payoy's Cursor Sub-Agents Setup",
-  "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Optimized for Next.js, Supabase, TypeScript.",
-  "version": "3.1.0",
+  "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Use with Cursor, Claude Code, GitHub Copilot, or Codex—apply the right workflow for your AI assistant.",
+  "version": "4.0.0",
   "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {
@@ -32,7 +32,14 @@
   "main": "./out/extension.js",
   "activationEvents": [
     "onCommand:payoys-cursor-sub-agents.openGuide",
-    "onCommand:payoys-cursor-sub-agents.openPublishing"
+    "onCommand:payoys-cursor-sub-agents.openPublishing",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowCurrent",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowPick",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowCursor",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowClaude",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowCopilot",
+    "onCommand:payoys-cursor-sub-agents.applyWorkflowCodex",
+    "onCommand:payoys-cursor-sub-agents.openDevGuide"
   ],
   "contributes": {
     "commands": [
@@ -43,6 +50,34 @@
       {
         "command": "payoys-cursor-sub-agents.openPublishing",
         "title": "Payoy's Cursor Setup: Open Publishing Guide"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.openDevGuide",
+        "title": "Payoy's Setup: Open Developer Guide"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowCurrent",
+        "title": "Payoy's Setup: Apply workflow for current AI"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowPick",
+        "title": "Payoy's Setup: Apply workflow for… (choose AI)"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowCursor",
+        "title": "Payoy's Setup: Apply workflow for Cursor"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowClaude",
+        "title": "Payoy's Setup: Apply workflow for Claude Code"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowCopilot",
+        "title": "Payoy's Setup: Apply workflow for GitHub Copilot"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.applyWorkflowCodex",
+        "title": "Payoy's Setup: Apply workflow for Codex"
       }
     ]
   },
@@ -52,6 +87,7 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@types/node": "^20.19.35",
     "@types/vscode": "^1.80.0",
     "typescript": "^5.3.0"
   }
