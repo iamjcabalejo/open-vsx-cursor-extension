@@ -12,9 +12,9 @@ function buildClaudeMd(extensionPath: string): string {
   if (!fs.existsSync(rulesDir)) return "# Project rules\n\nNo rules found.";
   const entries = fs.readdirSync(rulesDir, { withFileTypes: true });
   const parts: string[] = [
-    "# Payoy's workflow: rules and standards",
+    "# Plan-Code-Review workflow: rules and standards",
     "",
-    "This file was generated from the Payoy's Cursor Sub-Agents extension. Follow these rules and the compounding dev cycle (Plan → Code → Review/Test → Plan).",
+    "This file was generated from the Plan-Code-Review Workflow extension. Follow these rules and the compounding dev cycle (Plan → Code → Review/Test → Plan).",
     "",
   ];
   for (const e of entries) {

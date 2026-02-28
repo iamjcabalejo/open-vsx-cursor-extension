@@ -1,8 +1,8 @@
 {
-  "name": "payoys-cursor-sub-agents",
-  "displayName": "Payoy's Cursor Sub-Agents Setup",
-  "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Use with Cursor, Claude Code, GitHub Copilot, or Codex—apply the right workflow for your AI assistant.",
-  "version": "4.0.2",
+  "name": "plan-code-review-workflow",
+  "displayName": "Plan-Code-Review Workflow",
+  "description": "Apply the Plan → Code → Review cycle to Cursor, Claude Code, GitHub Copilot, or Codex. One workflow, automatic code review, production-ready features.",
+  "version": "4.0.3",
   "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {
@@ -31,53 +31,58 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onCommand:payoys-cursor-sub-agents.openGuide",
-    "onCommand:payoys-cursor-sub-agents.openPublishing",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowCurrent",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowPick",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowCursor",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowClaude",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowCopilot",
-    "onCommand:payoys-cursor-sub-agents.applyWorkflowCodex",
-    "onCommand:payoys-cursor-sub-agents.openDevGuide"
+    "onCommand:plan-code-review-workflow.openGuide",
+    "onCommand:plan-code-review-workflow.openPublishing",
+    "onCommand:plan-code-review-workflow.applyWorkflowCurrent",
+    "onCommand:plan-code-review-workflow.applyWorkflowPick",
+    "onCommand:plan-code-review-workflow.applyWorkflowCursor",
+    "onCommand:plan-code-review-workflow.applyWorkflowClaude",
+    "onCommand:plan-code-review-workflow.applyWorkflowCopilot",
+    "onCommand:plan-code-review-workflow.applyWorkflowCodex",
+    "onCommand:plan-code-review-workflow.openDevGuide",
+    "onCommand:plan-code-review-workflow.installCodexSkills"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "payoys-cursor-sub-agents.openGuide",
-        "title": "Payoy's Cursor Setup: Open Guide"
+        "command": "plan-code-review-workflow.openGuide",
+        "title": "Plan-Code-Review: Open Guide"
       },
       {
-        "command": "payoys-cursor-sub-agents.openPublishing",
-        "title": "Payoy's Cursor Setup: Open Publishing Guide"
+        "command": "plan-code-review-workflow.openPublishing",
+        "title": "Plan-Code-Review: Open Publishing Guide"
       },
       {
-        "command": "payoys-cursor-sub-agents.openDevGuide",
-        "title": "Payoy's Setup: Open Developer Guide"
+        "command": "plan-code-review-workflow.openDevGuide",
+        "title": "Plan-Code-Review: Open Developer Guide"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowCurrent",
-        "title": "Payoy's Setup: Apply workflow for current AI"
+        "command": "plan-code-review-workflow.applyWorkflowCurrent",
+        "title": "Plan-Code-Review: Apply workflow for current AI"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowPick",
-        "title": "Payoy's Setup: Apply workflow for… (choose AI)"
+        "command": "plan-code-review-workflow.applyWorkflowPick",
+        "title": "Plan-Code-Review: Apply workflow for… (choose AI)"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowCursor",
-        "title": "Payoy's Setup: Apply workflow for Cursor"
+        "command": "plan-code-review-workflow.applyWorkflowCursor",
+        "title": "Plan-Code-Review: Apply workflow for Cursor"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowClaude",
-        "title": "Payoy's Setup: Apply workflow for Claude Code"
+        "command": "plan-code-review-workflow.applyWorkflowClaude",
+        "title": "Plan-Code-Review: Apply workflow for Claude Code"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowCopilot",
-        "title": "Payoy's Setup: Apply workflow for GitHub Copilot"
+        "command": "plan-code-review-workflow.applyWorkflowCopilot",
+        "title": "Plan-Code-Review: Apply workflow for GitHub Copilot"
       },
       {
-        "command": "payoys-cursor-sub-agents.applyWorkflowCodex",
-        "title": "Payoy's Setup: Apply workflow for Codex"
+        "command": "plan-code-review-workflow.applyWorkflowCodex",
+        "title": "Plan-Code-Review: Apply workflow for Codex"
+      },
+      {
+        "command": "plan-code-review-workflow.installCodexSkills",
+        "title": "Plan-Code-Review: Install skills to Codex (~/.codex/skills)"
       }
     ]
   },

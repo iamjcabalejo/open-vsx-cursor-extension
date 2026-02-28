@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.3] - 2025-03-01
+
+### Changed
+
+- **Display name**: "Plan-Code-Review Workflow" (was the previous display name).
+- **Description**: Updated to emphasize Plan → Code → Review cycle and multi-AI support.
+- **Command titles**: All workflow commands now use the "Plan-Code-Review:" prefix (e.g. "Plan-Code-Review: Apply workflow for Codex").
+- **Versions**: All project version numbers aligned to 4.0.3 (package.json, .cursor-plugin/plugin.json, .cursor-plugin/marketplace.json, package-lock.json).
+
 ## [4.0.2] - 2025-03-01
 
 ### Changed
@@ -23,7 +32,7 @@
 ### Added
 
 - **DEV-GUIDE.md** — Developer guide: why we don't add `.claude` to the repo, packaging (`.vscodeignore`), how adapters work, testing and releasing.
-- Command: **Payoy's Setup: Open Developer Guide** — opens DEV-GUIDE.md.
+- Command: **Plan-Code-Review: Open Developer Guide** — opens DEV-GUIDE.md.
 
 ### Changed
 
@@ -44,7 +53,7 @@
 ### Added
 
 - Initial release as a VS Code / Open VSX extension
-- Command: **Payoy's Cursor Setup: Open Guide** — opens the main README
-- Command: **Payoy's Cursor Setup: Open Publishing Guide** — opens PUBLISHING.md
+- Command: **Plan-Code-Review: Open Guide** — opens the main README
+- Command: **Plan-Code-Review: Open Publishing Guide** — opens PUBLISHING.md
 
-This extension surfaces the Cursor plugin documentation inside VS Code and Cursor. For the full plugin (commands, agents, skills, rules, hooks), install from GitHub: `cursor plugins install iamjcabalejo/payoys-cursor-sub-agents`.
+This extension surfaces the Cursor plugin documentation inside VS Code and Cursor. For the full plugin (commands, agents, skills, rules, hooks), install from GitHub: `cursor plugins install iamjcabalejo/plan-code-review-workflow`.

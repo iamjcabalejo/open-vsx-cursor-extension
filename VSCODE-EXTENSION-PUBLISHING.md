@@ -1,6 +1,6 @@
 # Publishing This Project as a VS Code Extension
 
-Step-by-step instructions for publishing **Payoy's Cursor Sub-Agents** to the **VS Code Marketplace** and **Open VSX** (used by Cursor and other VS Code–compatible editors).
+Step-by-step instructions for publishing **Plan-Code-Review Workflow** to the **VS Code Marketplace** and **Open VSX** (used by Cursor and other VS Code–compatible editors).
 
 ---
 
@@ -45,7 +45,7 @@ For Open VSX you use `npx ovsx` (no global install needed).
 3. In the left pane, click **Create publisher**.
 4. Fill in:
    - **ID:** e.g. `braderpayoy` (cannot be changed later; used in extension URLs).
-   - **Name:** e.g. `Brader Payoy` (display name).
+   - **Name:** e.g. your display name or **JhonCabalejo** (publisher).
 5. Complete any other required fields and create the publisher.
 
 ### 2.3 Log in with vsce
@@ -67,7 +67,7 @@ Open VSX is used by Cursor and other editors. You publish with a token, not vsce
 1. Go to [open-vsx.org](https://open-vsx.org) and sign in with **GitHub**.
 2. Accept the **Publisher Agreement** if prompted.
 3. Open [Open VSX – User Settings – Tokens](https://open-vsx.org/user-settings/tokens).
-4. Click **Create new token**, give it a name (e.g. `Publish Payoys Cursor`), and create it.
+4. Click **Create new token**, give it a name (e.g. `Publish Plan-Code-Review Workflow`), and create it.
 5. **Copy the token** and store it securely; it won’t be shown again.
 
 The **namespace** (publisher) on Open VSX is taken from your extension’s `package.json` `publisher` field (e.g. `braderpayoy`). The first time you publish, the namespace will be created if it doesn’t exist.
@@ -89,12 +89,12 @@ npm run compile
 npx @vscode/vsce package
 ```
 
-You should get a file like `payoys-cursor-sub-agents-3.1.0.vsix`.
+You should get a file like `plan-code-review-workflow-4.0.3.vsix`.
 
 ### Test the .vsix locally
 
 - In VS Code or Cursor: **Extensions** view → **...** (More Actions) → **Install from VSIX...** → select the `.vsix` file.
-- Run the commands **Payoy's Cursor Setup: Open Guide** and **Open Publishing Guide** from the Command Palette to confirm they work.
+- Run the commands **Plan-Code-Review: Open Guide** and **Plan-Code-Review: Open Publishing Guide** from the Command Palette to confirm they work.
 
 ---
 

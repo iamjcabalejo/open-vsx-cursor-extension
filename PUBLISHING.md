@@ -1,4 +1,4 @@
-# Publishing Guide: Brader Payoy's Cursor Plugin
+# Publishing Guide: Plan-Code-Review Workflow
 
 Complete step-by-step instructions for publishing your Cursor plugin to GitHub and as a VS Code extension (VS Code Marketplace + Open VSX).
 
@@ -19,7 +19,7 @@ This plugin is built around a **compounding development cycle** (Plan → Code �
 1. Go to https://github.com/new
 2. Fill in the details:
    - **Repository name**: `whatever-name-you-like`
-   - **Description**: "Brader Payoy's Cursor setup: 15 commands, 17 AI agents, 14 skills, 6 rules, and hooks. Plan → Code → Review/Test cycle with feature-plan and project-manager."
+   - **Description**: "Plan-Code-Review Workflow: 15 commands, 17 AI agents, 14 skills, 6 rules, and hooks. Plan → Code → Review/Test cycle with feature-plan and project-manager."
    - **Visibility**: Public (so others can install it)
    - **Initialize**: ❌ Don't add README, .gitignore, or license (we already have these)
 3. Click "Create repository"
@@ -50,14 +50,14 @@ Example summary for sharing (align with your current `plugin.json` version and d
 
 ```json
 {
-  "name": "payoys-cursor-sub-agents",
-  "description": "Brader Payoy's Cursor setup: 15 commands, 17 AI agents, 14 skills, 6 rules, and hooks for Plan → Code → Review/Test cycle",
-  "version": "1.0.0",
-  "author": "Brader Payoy"
+  "name": "plan-code-review-workflow",
+  "description": "Apply the Plan → Code → Review cycle: 15 commands, 17 AI agents, 14 skills, 6 rules, and hooks for Cursor, Claude Code, Copilot, or Codex",
+  "version": "4.0.3",
+  "author": "Jhon Cabalejo"
 }
 ```
 
-Install from GitHub: **Install Plugin from GitHub** → `iamjcabalejo/payoys-cursor-sub-agents`, or CLI: `cursor plugins install iamjcabalejo/payoys-cursor-sub-agents`.
+Install from GitHub: **Install Plugin from GitHub** → `iamjcabalejo/plan-code-review-workflow`, or CLI: `cursor plugins install iamjcabalejo/plan-code-review-workflow`.
 
 ### Option C: Share on Social Media
 
@@ -182,7 +182,7 @@ npm run compile
 vsce package
 ```
 
-This produces `payoys-cursor-sub-agents-3.1.0.vsix`. You can install it locally via **Extensions** → **Views and More Actions** → **Install from VSIX...**.
+This produces `plan-code-review-workflow-4.0.3.vsix`. You can install it locally via **Extensions** → **Views and More Actions** → **Install from VSIX...**.
 
 ### Publish
 

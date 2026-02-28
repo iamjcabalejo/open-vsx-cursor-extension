@@ -1,9 +1,9 @@
 {
-  "name": "payoys-cursor-sub-agents",
-  "version": "4.0.2",
-  "description": "Brader Payoy's personal Cursor Agents setup with commands, agents, skills, rules, and hooks for modern web development",
+  "name": "plan-code-review-workflow",
+  "version": "4.0.3",
+  "description": "Apply the Plan → Code → Review cycle with commands, agents, skills, rules, and hooks for Cursor, Claude Code, Copilot, or Codex.",
   "author": {
-    "name": "Brader Payoy",
+    "name": "Jhon Cabalejo",
     "email": "iamjcabalejo@gmail.com"
   },
   "license": "MIT",

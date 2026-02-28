@@ -6,12 +6,13 @@ import {
   detectAvailableAssistants,
   type AIAssistant,
 } from "./adapters";
+import { installCodexSkills } from "./installCodexSkills";
 
 export function activate(context: vscode.ExtensionContext): void {
   const basePath = context.extensionPath;
 
   const openGuide = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.openGuide",
+    "plan-code-review-workflow.openGuide",
     () => {
       const uri = vscode.Uri.joinPath(vscode.Uri.file(basePath), "README.md");
       vscode.workspace.openTextDocument(uri).then((doc) => {
@@ -21,7 +22,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const openPublishing = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.openPublishing",
+    "plan-code-review-workflow.openPublishing",
     () => {
       const uri = vscode.Uri.joinPath(vscode.Uri.file(basePath), "PUBLISHING.md");
       vscode.workspace.openTextDocument(uri).then((doc) => {
@@ -31,7 +32,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const openDevGuide = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.openDevGuide",
+    "plan-code-review-workflow.openDevGuide",
     () => {
       const uri = vscode.Uri.joinPath(vscode.Uri.file(basePath), "DEV-GUIDE.md");
       vscode.workspace.openTextDocument(uri).then((doc) => {
@@ -72,7 +73,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   const applyWorkflowCurrent = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowCurrent",
+    "plan-code-review-workflow.applyWorkflowCurrent",
     () => {
       const recommended = recommendAssistant();
       if (!recommended) {
@@ -86,7 +87,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const applyWorkflowPick = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowPick",
+    "plan-code-review-workflow.applyWorkflowPick",
     async () => {
       const available = detectAvailableAssistants();
       const adapters = getAdapters();
@@ -96,7 +97,7 @@ export function activate(context: vscode.ExtensionContext): void {
         detail: available.includes(a.id) ? "Available" : undefined,
       }));
       const picked = await vscode.window.showQuickPick(items, {
-        title: "Apply Payoy's workflow for",
+        title: "Apply workflow for",
         matchOnDescription: true,
       });
       if (!picked) return;
@@ -106,20 +107,34 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const applyWorkflowCursor = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowCursor",
+    "plan-code-review-workflow.applyWorkflowCursor",
     () => applyAndNotify("cursor")
   );
   const applyWorkflowClaude = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowClaude",
+    "plan-code-review-workflow.applyWorkflowClaude",
     () => applyAndNotify("claude")
   );
   const applyWorkflowCopilot = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowCopilot",
+    "plan-code-review-workflow.applyWorkflowCopilot",
     () => applyAndNotify("copilot")
   );
   const applyWorkflowCodex = vscode.commands.registerCommand(
-    "payoys-cursor-sub-agents.applyWorkflowCodex",
+    "plan-code-review-workflow.applyWorkflowCodex",
     () => applyAndNotify("codex")
+  );
+
+  const installCodexSkillsCmd = vscode.commands.registerCommand(
+    "plan-code-review-workflow.installCodexSkills",
+    () => {
+      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const result = installCodexSkills(workspaceRootPath);
+      if (result.success) {
+        const detail = result.details?.length ? "\n" + result.details.join("\n") : "";
+        vscode.window.showInformationMessage(result.message + detail, { modal: false });
+      } else {
+        vscode.window.showErrorMessage(result.message);
+      }
+    }
   );
 
   context.subscriptions.push(
@@ -131,7 +146,8 @@ export function activate(context: vscode.ExtensionContext): void {
     applyWorkflowCursor,
     applyWorkflowClaude,
     applyWorkflowCopilot,
-    applyWorkflowCodex
+    applyWorkflowCodex,
+    installCodexSkillsCmd
   );
 }
 

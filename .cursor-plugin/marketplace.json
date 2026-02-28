@@ -1,20 +1,20 @@
 {
-  "name": "payoys-plugins",
+  "name": "plan-code-review-plugins",
   "owner": {
-    "name": "Brader Payoy",
+    "name": "Jhon Cabalejo",
     "email": "iamjcabalejo@gmail.com"
   },
   "metadata": {
-    "description": "Brader Payoy's curated Cursor plugins for productive development with agents, skills, rules, and commands."
+    "description": "Plan-Code-Review workflow: commands, agents, skills, rules, and hooks for productive development with Cursor, Claude Code, Copilot, or Codex."
   },
   "plugins": [
     {
-      "name": "payoys-cursor-sub-agents",
+      "name": "plan-code-review-workflow",
       "source": ".",
-      "description": "Personal Cursor Agents setup with commands, agents, skills, rules, and hooks for modern web development.",
-      "version": "4.0.2",
+      "description": "Apply the Plan → Code → Review cycle with commands, agents, skills, rules, and hooks. Works with Cursor, Claude Code, Copilot, or Codex.",
+      "version": "4.0.3",
       "author": {
-        "name": "Brader Payoy",
+        "name": "Jhon Cabalejo",
         "email": "iamjcabalejo@gmail.com"
       },
       "license": "MIT",

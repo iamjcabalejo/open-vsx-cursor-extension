@@ -1,4 +1,4 @@
-# Developer Guide: Payoy's Cursor Sub-Agents Extension
+# Developer Guide: Plan-Code-Review Workflow
 
 This guide explains how the extension is set up, why certain folders are or aren’t in the repo, and how to change or extend it.
 

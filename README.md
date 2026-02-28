@@ -1,4 +1,4 @@
-# Payoy's Cursor Sub-Agents
+# Plan-Code-Review Workflow
 
 **One workflow. Four AI assistants. Production-ready code—without the guesswork.**
 
@@ -33,17 +33,17 @@ AI can write code fast—but without a clear plan and review loop, you get scope
 
 ## Install the extension
 
-- **VS Code:** [VS Code Marketplace](https://marketplace.visualstudio.com/) or [Open VSX](https://open-vsx.org/) — search for **Payoy's Cursor Sub-Agents**.
-- **Cursor IDE:** The Cursor plugin is not yet available in Cursor’s plugin marketplace (approval pending). **Use this instead:** install the extension in **VS Code**, open your project in VS Code, run **Payoy's Setup: Apply workflow for Cursor**, then open the same project in Cursor—the workflow files (`.cursor/`, `.cursor-plugin/`) are in your repo and Cursor will use them. Full plugin install from Cursor’s marketplace will be available once approved.
+- **VS Code:** [VS Code Marketplace](https://marketplace.visualstudio.com/) or [Open VSX](https://open-vsx.org/) — search for **Plan-Code-Review Workflow**.
+- **Cursor IDE:** The Cursor plugin is not yet available in Cursor’s plugin marketplace (approval pending). **Use this instead:** install the extension in **VS Code**, open your project in VS Code, run **Plan-Code-Review: Apply workflow for Cursor**, then open the same project in Cursor—the workflow files (`.cursor/`, `.cursor-plugin/`) are in your repo and Cursor will use them. Full plugin install from Cursor’s marketplace will be available once approved.
 
 ## Apply the workflow to your project
 
 1. Open your **project root** in **VS Code** (or in Cursor if you already have the workflow applied).
 2. Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) → run one of:
-   - **Payoy's Setup: Apply workflow for… (choose AI)** — pick Cursor, Claude Code, Copilot, or Codex
-   - Or a specific command: **Apply workflow for Cursor** / **Claude Code** / **GitHub Copilot** / **Codex**
+   - **Plan-Code-Review: Apply workflow for… (choose AI)** — pick Cursor, Claude Code, Copilot, or Codex
+   - Or a specific command: **Plan-Code-Review: Apply workflow for Cursor** / **Claude Code** / **GitHub Copilot** / **Codex**
 
-**Cursor users:** Install the extension in VS Code, open your project there, run **Apply workflow for Cursor**, then switch to Cursor and open the same project—you get full slash commands and agents. No Cursor plugin install needed until the plugin is approved.
+**Cursor users:** Install the extension in VS Code, open your project there, run **Plan-Code-Review: Apply workflow for Cursor**, then switch to Cursor and open the same project—you get full slash commands and agents. No Cursor plugin install needed until the plugin is approved.
 
 The extension writes the right files into your workspace. Your AI assistant uses them automatically.
 
@@ -80,9 +80,9 @@ Edit `.cursor/commands/`, `.cursor/agents/`, `.cursor/skills/`, `.cursor/rules/`
 
 ## More info
 
-- **Developer guide:** Command Palette → **Payoy's Setup: Open Developer Guide**
-- **Publishing:** Command Palette → **Payoy's Setup: Open Publishing Guide**
+- **Developer guide:** Command Palette → **Plan-Code-Review: Open Developer Guide**
+- **Publishing:** Command Palette → **Plan-Code-Review: Open Publishing Guide**
 
 ## License & author
 
-MIT — use freely. Created by Brader Payoy.
+MIT — use freely.
