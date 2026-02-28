@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.1] - 2025-03-01
+
+### Added
+
+- README: **Loading the tools** section with steps and sample prompts for Codex, Claude Code, Copilot, and Cursor (how to load and use rules/skills/agents; list of Codex skill names).
+
+### Changed
+
+- Claude adapter: hook command now uses `$CLAUDE_PROJECT_DIR/.claude/hooks/…` for reliable resolution; `.claude/settings.json` includes `$schema` for Claude Code settings.
+- DEV-GUIDE: clarified that generated `.claude` layout follows Claude Code's official project pattern.
+
 ## [4.0.0] - 2025-03-01
 
 ### Added

@@ -60,7 +60,7 @@ So the developer guide reason is: **we don’t add a `.claude` folder to the rep
 So:
 
 - **Cursor adapter** — Copies `extensionPath/.cursor` and `extensionPath/.cursor-plugin` into `workspaceRootPath`.
-- **Claude adapter** — Creates `workspaceRootPath/.claude/agents/` (from `.cursor/agents`), `workspaceRootPath/CLAUDE.md` (from `.cursor/rules`), and optionally `.claude/hooks/` and `.claude/settings.json`.
+- **Claude adapter** — Creates `workspaceRootPath/.claude/agents/` (from `.cursor/agents`), `workspaceRootPath/CLAUDE.md` (from `.cursor/rules`), and optionally `.claude/hooks/` and `.claude/settings.json`. The layout follows **Claude Code’s official project pattern**: project scope uses `.claude/settings.json` (with `$schema`), `.claude/agents/` for subagents (Markdown + YAML frontmatter), and `CLAUDE.md` at repo root (or `.claude/CLAUDE.md`). Hook commands use `$CLAUDE_PROJECT_DIR/.claude/hooks/…` so they resolve correctly when the working directory changes.
 - **Copilot adapter** — Writes `workspaceRootPath/.github/copilot-instructions.md` and `workspaceRootPath/AGENTS.md` from rules + agent summaries.
 - **Codex adapter** — Writes `workspaceRootPath/.agents/skills/` (from `.cursor/skills`) and `workspaceRootPath/AGENTS.md`.
 
@@ -90,7 +90,7 @@ All of this happens in the user’s workspace when they run the command; nothing
 |----------|--------|
 | Why is there no `.claude` in the repo? | `.claude` is generated in the user’s workspace by the Claude adapter; the repo only holds the adapter code and the canonical `.cursor/` content. |
 | Why must `.cursor` be in the extension package? | Adapters read from `extensionPath/.cursor/` to generate assistant-specific files; if `.cursor` is excluded via `.vscodeignore`, the package has no workflow and apply commands fail. |
-| Where does `.claude` get created? | In the first workspace folder’s root when the user runs **Apply workflow for Claude Code**. |
+| Where does `.claude` get created? | In the first workspace folder’s root when the user runs **Apply workflow for Claude Code**. The structure matches Claude Code’s project scope: `.claude/settings.json`, `.claude/agents/`, `.claude/hooks/`, and `CLAUDE.md` at root. |
 | Can I add a pre-built `.claude` for convenience? | Not recommended; it would duplicate and can drift from `.cursor/`. Prefer improving the Claude adapter so it generates everything needed from `.cursor/`. |
 
 ---

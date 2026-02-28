@@ -1,6 +1,6 @@
 {
   "name": "payoys-cursor-sub-agents",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Brader Payoy's personal Cursor Agents setup with commands, agents, skills, rules, and hooks for modern web development",
   "author": {
     "name": "Brader Payoy",

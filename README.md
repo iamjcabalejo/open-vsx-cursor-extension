@@ -57,6 +57,88 @@ When you run **Payoy's Setup: Apply workflow for Cursor**, the extension copies 
 
 **Summary:** One workflow, four ways to use it. Apply the workflow for your assistant once; then use **rules** via the generated project file (CLAUDE.md, AGENTS.md, or .cursor/rules), **agents** via the generated agents folder or instructions, **skills** via the skills folder (Codex) or by reference in rules/agents (Claude, Copilot), and **commands** either as native slash commands (Cursor) or by describing the same steps in chat (Claude, Copilot, Codex).
 
+### Loading the tools: what to do and sample prompts
+
+After you run **Apply workflow for [your AI]**, the extension has written the right files into your workspace. Here’s how to **load and use** those tools, with sample prompts you can use.
+
+---
+
+#### Codex: load and use the tools
+
+1. **Apply the workflow**  
+   Command Palette → **Payoy's Setup: Apply workflow for Codex**. This creates:
+   - **`AGENTS.md`** at the repo root — rules (compounding dev cycle, core standards, TypeScript, React, API, E2E) and the list of agent roles. Codex loads this automatically as project guidance.
+   - **`.agents/skills/`** — each subfolder (e.g. `code-review`, `api-design-patterns`, `postgresql`) contains a `SKILL.md`. Codex discovers these; you reference them by **skill name** in chat.
+
+2. **No extra “load” step**  
+   Codex reads `AGENTS.md` and `.agents/skills/` from your project; you don’t need to run any code. Just open the repo in VS Code with the Codex extension and start chatting.
+
+3. **Sample prompts to use the workflow**
+
+   - **Use rules from AGENTS.md:**  
+     *"Follow the rules in AGENTS.md for this change."*  
+     *"Apply the compounding dev cycle from AGENTS.md: plan first, then implement, then review."*
+
+   - **Use a skill by name:**  
+     *"Use the code-review skill to review this PR."*  
+     *"Apply the postgresql skill when designing this query."*  
+     *"Use the api-testing skill to add tests for this endpoint."*  
+     *"Apply the accessibility-checklist skill for this component."*
+
+   - **Invoke an agent role from AGENTS.md:**  
+     *"Act as the backend-architect from AGENTS.md and design the API for user profiles."*  
+     *"Review this code as the frontend-reviewer would (see AGENTS.md)."*
+
+   - **Run the full cycle (plan → code → review):**  
+     *"Create a feature plan for [describe feature] following the compounding dev cycle in AGENTS.md. Then implement it and do a review pass."*
+
+   **Skills available after apply:** `agent-selection`, `api-design-patterns`, `api-testing`, `code-review`, `e2e-playwright`, `feature-planning`, `requirements-discovery`, `security-audit`, `accessibility-checklist`, `performance-profiling`, `refactoring-checklist`, `docs-structure`, `postgresql`, `nosql-databases`.
+
+---
+
+#### Claude Code: load and use the tools
+
+1. **Apply the workflow**  
+   Command Palette → **Payoy's Setup: Apply workflow for Claude Code**. This creates **`.claude/agents/`**, **`CLAUDE.md`**, and optionally **`.claude/hooks/`** and **`.claude/settings.json`**. Claude Code loads project instructions from `CLAUDE.md` and subagents from `.claude/agents/` automatically.
+
+2. **Sample prompts**
+
+   - *"Follow CLAUDE.md for this task."*  
+   - *"Act as the backend-architect (from .claude/agents) and design this API."*  
+   - *"Apply the code-review checklist from the project rules."*  
+   - *"Create a feature plan per the compounding dev cycle in CLAUDE.md, then implement and review."*
+
+   Make hook scripts executable if you use them: `chmod +x .claude/hooks/*.sh`
+
+---
+
+#### GitHub Copilot: load and use the tools
+
+1. **Apply the workflow**  
+   Command Palette → **Payoy's Setup: Apply workflow for GitHub Copilot**. This creates **`.github/copilot-instructions.md`** and **`AGENTS.md`**. Copilot uses these as always-on context; no extra load step.
+
+2. **Sample prompts**
+
+   - *"Follow the rules in AGENTS.md (or .github/copilot-instructions.md)."*  
+   - *"Implement this like the backend-architect described in the project instructions."*  
+   - *"Review this change against the compounding dev cycle and our code standards."*
+
+---
+
+#### Cursor: load and use the tools
+
+1. **Apply the workflow**  
+   Command Palette → **Payoy's Setup: Apply workflow for Cursor**. This copies **`.cursor/`** and **`.cursor-plugin/`** into the workspace. Cursor loads them automatically.
+
+2. **Use slash commands** (no sample “prompts” needed)  
+   - `/feature-plan` — then describe the feature.  
+   - `/project-manager docs/plans/<feature>.md` — run the full cycle.  
+   - `/api-new`, `/component-new`, `/code-review`, etc. as listed in **What's Inside** below.
+
+   Rules, agents, and skills are applied by Cursor from `.cursor/`; you don’t need to reference them manually unless you want to (e.g. “use the backend-architect agent”).
+
+---
+
 This plugin provides **15 slash commands**, **17 specialized AI agents**, **14 project skills**, **6 rules**, and **hooks** for trigger-based automation. At its core is a **compounding development cycle** that turns feature ideas into production-ready code with clear handoffs, automated code review, and a loop until quality gates pass.
 
 ## Why the compounding development cycle?

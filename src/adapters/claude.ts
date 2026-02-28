@@ -94,12 +94,18 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
         }
       }
       if (!settings.hooks) {
+        if (!settings["$schema"]) {
+          settings["$schema"] = "https://json.schemastore.org/claude-code-settings.json";
+        }
         (settings as { hooks?: unknown }).hooks = {
           SessionStart: [
             {
               matcher: "*",
               hooks: [
-                { type: "command" as const, command: ".claude/hooks/session-init.sh" },
+                {
+                  type: "command" as const,
+                  command: "$CLAUDE_PROJECT_DIR/.claude/hooks/session-init.sh",
+                },
               ],
             },
           ],
