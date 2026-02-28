@@ -3,11 +3,11 @@
   "displayName": "Payoy's Cursor Sub-Agents Setup",
   "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Optimized for Next.js, Supabase, TypeScript.",
   "version": "3.1.0",
-  "publisher": "braderpayoy",
+  "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iamjcabalejo/payoys-cursor-sub-agents"
+    "url": "https://github.com/iamjcabalejo/open-vsx-cursor-extension.git"
   },
   "engines": {
     "vscode": "^1.80.0"
