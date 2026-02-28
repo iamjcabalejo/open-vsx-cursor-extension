@@ -1,0 +1,89 @@
+---
+description: Plan → Code → Review/Test → Plan cycle with clear handoffs between agents
+alwaysApply: true
+---
+
+# Compounding Development Cycle
+
+Follow **Plan → Code → Review/Test → Plan** for every feature or change. Each phase produces handoff artifacts so the next agent can continue without loss of context.
+
+---
+
+## 1. Plan
+
+**Goal:** Unambiguous scope, acceptance criteria, and technical approach before implementation.
+
+**Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
+
+**Outputs (handoff to Code):**
+- **Scope:** What is in/out; dependencies and boundaries.
+- **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
+- **Technical approach:** Key components, APIs, data shapes; references to existing rules (e.g. `core-standards.mdc`, `api-routes.mdc`).
+- **Task list:** Ordered implementation steps; optional rough file/area mapping.
+
+**Artifact:** Prefer a single plan doc (e.g. `docs/plans/<feature>.md` or ticket) that Code can open and follow. Use `feature-plan` to produce the plan file; use `project-manager` with that plan to run the full cycle (Code → Review/Test → Plan if needed → repeat until production ready).
+
+**Agents:** requirements-analyst (discovery), tech-stack-researcher (choices), backend-architect / frontend-architect (design). One agent can own the final plan; others feed into it.
+
+**Handoff rule:** Plan is complete when another agent can implement without guessing scope or acceptance.
+
+---
+
+## 2. Code
+
+**Goal:** Implement exactly to the plan; preserve handoff for Review/Test.
+
+**Inputs:** Plan artifact, project rules (core-standards, api-routes, typescript, react, e2e-tests), existing code.
+
+**Outputs (handoff to Review/Test):**
+- **Implementation:** Code that satisfies acceptance criteria and project standards.
+- **Tests:** Unit/integration/API tests for new behavior; follow `api-test` / E2E patterns where relevant.
+- **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes. Use this minimal template for consistency:
+  - **Done:** What was implemented (and which AC it maps to, if applicable).
+  - **Deferred:** What was explicitly postponed with a brief reason.
+  - **Assumptions:** Any assumptions about environment, dependencies, or behavior.
+  - **Env/config:** Required env vars, config changes, or setup steps.
+
+**Discipline:** Do not expand scope beyond the plan without updating the plan first. If the plan is wrong, note it and either adjust the plan doc or hand back to Plan for a quick revision.
+
+**Agents:** backend-architect, frontend-architect, database-expert, or general implementation. Match agent to the changed areas.
+
+**Handoff rule:** Review/Test must see a clear diff, the plan’s acceptance criteria, and the implementation notes so they can verify and test.
+
+---
+
+## 3. Review / Test
+
+**Goal:** Verify behavior, standards, and security; produce a clear pass/fail and rework list.
+
+**Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
+
+**Outputs (handoff to Plan or Code):**
+- **Review summary:** Alignment with plan, adherence to core-standards and api-routes, security and performance notes.
+- **Test status:** Which acceptance criteria are covered; any failing or missing tests.
+- **Rework list:** Concrete, actionable items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**. No vague “improve X.”
+
+**Gates:** All acceptance criteria covered by tests; no known violations of project rules; no unresolved high-severity security or data-integrity issues. **Code is production ready when gates pass and there are no Critical rework items.**
+
+**Agents:** backend-reviewer, frontend-reviewer (project-manager triggers these **code reviewers** automatically after Code); optionally security-engineer, performance-engineer when in scope. **E2E testing is not auto-triggered**—the user runs it when they want (e.g. e2e-runner or running the test suite).
+
+**Handoff rule:** If there are **Critical** rework items or gates not passed, feed back into **Plan** (rework = new AC), then **Code** (fix), then **Review/Test** again. Repeat until gates pass and no Critical issues—then code is **finalized and production ready**. If only trivial/suggestion rework, hand to **Code** with the rework list and re-run Review/Test.
+
+---
+
+## 4. Plan (next iteration)
+
+**Goal:** Treat rework or new scope as a new cycle so nothing is dropped.
+
+**Inputs:** Rework list from Review/Test (especially **Critical** items), or new user request.
+
+**Process:** Turn rework items into a short plan (scope = fixing issues, acceptance criteria = each critical item resolved, tasks for Code). Then **Code** (implement fixes) → **Review/Test** (backend-reviewer, frontend-reviewer only; E2E remains user-triggered) again. **project-manager runs this loop automatically:** when Review/Test reports critical issues, it creates the rework plan, spawns Code agents to fix, triggers Review/Test again, and repeats until there are no critical issues and gates pass—then declares code **production ready**.
+
+---
+
+## Cross-phase standards
+
+- **Consistency:** All phases respect `core-standards.mdc` and domain rules (`api-routes.mdc`, etc.).
+- **Traceability:** Link code and review back to the plan (e.g. “implements AC-1, AC-2” in commits or PR description).
+- **Single source of truth:** The plan doc is the contract; change it when scope or criteria change, then proceed.
+- **Smooth handoff:** Each phase ends with written artifacts the next phase needs; avoid “verbal” handoffs only.

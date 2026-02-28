@@ -1,0 +1,41 @@
+---
+description: API route conventions
+globs: "**/api/**/*.ts"
+alwaysApply: false
+---
+
+# API Routes
+
+## Validation
+- Validate all input at the route boundary before business logic
+- Use a schema library (Zod, Yup) for request body, query, and params
+- Return 400 for invalid input with field-level error details
+
+## Response Shape
+- Success: return the resource or `{ data: ... }`; use 200 (GET/PUT/PATCH), 201 (POST), 204 (DELETE)
+- Errors: use consistent shape: `{ error: { code: string, message: string, details?: array } }`
+- Never expose stack traces, internal paths, or sensitive data in production
+
+## Status Codes
+| Code | Use case |
+|------|----------|
+| 200 | Success (GET, PUT, PATCH) |
+| 201 | Created (POST) |
+| 204 | No content (DELETE) |
+| 400 | Bad request, validation failed |
+| 401 | Unauthorized, not authenticated |
+| 403 | Forbidden, authenticated but not allowed |
+| 404 | Resource not found |
+| 409 | Conflict (e.g., duplicate) |
+| 500 | Server error (log details, return generic message) |
+
+## Security
+- Authenticate and authorize before processing; return 401/403 early
+- Validate content-type and body size; reject unexpected payloads
+- Use parameterized queries; never concatenate user input into SQL
+- Rate limit sensitive endpoints (auth, password reset)
+
+## Structure
+- Keep route handlers thin; delegate to service/use-case layer
+- Use try/catch; map known errors to status codes; log unexpected errors
+- Document endpoints (OpenAPI/JSDoc) with params, body, and response shapes

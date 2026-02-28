@@ -1,0 +1,32 @@
+---
+description: E2E test patterns
+globs: "**/*.spec.ts"
+alwaysApply: false
+---
+
+# E2E Tests
+
+## Selectors
+- **Prefer**: `getByRole`, `getByLabelText`, `getByPlaceholderText`, `getByTestId`
+- **Avoid**: Deep CSS selectors, `:nth-child`, XPath for layout—they break on refactors
+- Add `data-testid` when role/label are insufficient; keep IDs stable and semantic
+
+## Waiting
+- Rely on Playwright auto-waiting; avoid `page.waitForTimeout()` (causes flakiness)
+- Use `expect(locator).toBeVisible()` or `locator.click()` (auto-waits before click)
+- For network: `page.waitForResponse()`, `page.waitForRequest()` when needed
+
+## Test Design
+- Each test must run in isolation; no shared mutable state between tests
+- Use `beforeEach` for setup; seed or reset data per test
+- Use unique test data (timestamps, UUIDs) to avoid collisions in parallel runs
+
+## Structure
+- Use Page Object Model for reusable page interactions; keep tests readable
+- Group tests by feature or user flow with `test.describe`
+- Assert outcomes, not implementation; test what the user sees and does
+
+## Reliability
+- Keep individual tests under ~30 seconds; split long flows if needed
+- Use `trace: 'on-first-retry'` and `screenshot: 'only-on-failure'` for debugging
+- Run tests locally before pushing; fix flakiness immediately—never ignore

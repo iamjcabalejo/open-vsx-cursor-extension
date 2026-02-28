@@ -1,0 +1,42 @@
+{
+  "name": "payoys-cursor-sub-agents",
+  "version": "3.1.0",
+  "description": "Brader Payoy's personal Cursor Agents setup with commands, agents, skills, rules, and hooks for modern web development",
+  "author": {
+    "name": "Brader Payoy",
+    "email": "iamjcabalejo@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "productivity",
+    "nextjs",
+    "supabase",
+    "typescript",
+    "react",
+    "api",
+    "development",
+    "mcp"
+  ],
+  "rules": ".cursor/rules/",
+  "agents": ".cursor/agents/",
+  "skills": ".cursor/skills/",
+  "commands": ".cursor/commands/",
+  "hooks": ".cursor/hooks.json",
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "description": "Access up-to-date documentation for any library"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "description": "Browser automation and web testing capabilities"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase"],
+      "description": "Supabase database operations and management"
+    }
+  }
+}

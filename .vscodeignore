@@ -1,0 +1,14 @@
+.vscode/**
+src/**
+tsconfig.json
+.gitignore
+node_modules
+*.md
+!README.md
+!PUBLISHING.md
+!CHANGELOG.md
+.cursor/**
+.cursor-plugin/**
+docs/**
+**/*.map
+**/.git/**

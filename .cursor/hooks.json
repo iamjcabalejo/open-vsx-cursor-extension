@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "afterFileEdit": [{"command": ".cursor/hooks/format.sh", "timeout": 10}],
+    "afterShellExecution": [{"command": ".cursor/hooks/audit.sh", "timeout": 5}],
+    "beforeShellExecution": [{"command": ".cursor/hooks/audit.sh", "timeout": 5}],
+    "sessionEnd": [{"command": ".cursor/hooks/audit.sh", "timeout": 5}],
+    "sessionStart": [{"command": ".cursor/hooks/session-init.sh", "timeout": 5}],
+    "stop": [{"command": ".cursor/hooks/audit.sh", "timeout": 5}]
+  }
+}

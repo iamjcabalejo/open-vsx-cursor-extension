@@ -1,0 +1,58 @@
+{
+  "name": "payoys-cursor-sub-agents",
+  "displayName": "Payoy's Cursor Sub-Agents Setup",
+  "description": "Brader Payoy's Cursor setup: commands, agents, skills, rules, and hooks for Plan → Code → Review/Test cycle. Optimized for Next.js, Supabase, TypeScript.",
+  "version": "3.1.0",
+  "publisher": "braderpayoy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamjcabalejo/payoys-cursor-sub-agents"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Snippets",
+    "Formatters"
+  ],
+  "keywords": [
+    "productivity",
+    "nextjs",
+    "supabase",
+    "typescript",
+    "react",
+    "api",
+    "development",
+    "mcp",
+    "cursor",
+    "agents"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:payoys-cursor-sub-agents.openGuide",
+    "onCommand:payoys-cursor-sub-agents.openPublishing"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "payoys-cursor-sub-agents.openGuide",
+        "title": "Payoy's Cursor Setup: Open Guide"
+      },
+      {
+        "command": "payoys-cursor-sub-agents.openPublishing",
+        "title": "Payoy's Cursor Setup: Open Publishing Guide"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.0"
+  }
+}
