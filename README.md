@@ -49,6 +49,16 @@ For **Claude Code**, you’ll be asked whether to install in the **project root*
 
 The extension writes the right files into your workspace. Your AI assistant uses them automatically.
 
+### Remove the workflow
+
+To remove **only** what this extension added (your existing commands, skills, rules, and hooks from other sources stay untouched):
+
+- Command Palette → **Plan-Code-Review: Remove workflow from all AI assistants**
+
+The extension keeps a manifest of what it applied (workspace and user). Remove uses that list so only extension-added items are deleted. To see exactly what’s recorded before removing:
+
+- Command Palette → **Plan-Code-Review: Show applied workflow log**
+
 | Assistant     | What gets created |
 |---------------|-------------------|
 | **Cursor**    | `.cursor/`, `.cursor-plugin/` — full slash commands, agents, rules, hooks |
