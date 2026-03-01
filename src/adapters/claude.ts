@@ -1,7 +1,15 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import type { AdapterContext, ApplyResult } from "./types";
+import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import {
+  getWorkspaceManifest,
+  getUserManifest,
+  recordWorkspaceApplied,
+  recordUserApplied,
+  clearWorkspaceManifest,
+  clearUserManifest,
+} from "../workflowManifest";
 
 function stripFrontmatter(content: string): string {
   const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
@@ -167,6 +175,12 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
       }
     }
 
+    if (isUser) {
+      recordUserApplied({ claude: { appliedAt: new Date().toISOString() } });
+    } else {
+      recordWorkspaceApplied(workspaceRootPath!, { claude: { appliedAt: new Date().toISOString() } });
+    }
+
     return {
       success: true,
       message: isUser
@@ -182,4 +196,101 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
       details,
     };
   }
+}
+
+/**
+ * Remove Claude Code workflow only from locations recorded in the manifest (extension-added only).
+ */
+export async function removeClaude(context: AdapterContext): Promise<RemoveResult> {
+  const { workspaceRootPath } = context;
+  const details: string[] = [];
+  const errors: string[] = [];
+  const workspaceManifest = getWorkspaceManifest(workspaceRootPath);
+  const userManifest = getUserManifest();
+
+  function removeDir(dirPath: string): void {
+    if (fs.existsSync(dirPath)) {
+      try {
+        fs.rmSync(dirPath, { recursive: true });
+        details.push(`Removed ${dirPath}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${dirPath}: ${message}`);
+      }
+    }
+  }
+
+  function removeFile(filePath: string): void {
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+        details.push(`Removed ${filePath}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${filePath}: ${message}`);
+      }
+    }
+  }
+
+  function clearHooksInSettings(settingsPath: string): void {
+    if (!fs.existsSync(settingsPath)) return;
+    try {
+      const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8")) as Record<string, unknown>;
+      if (settings.hooks) {
+        delete settings.hooks;
+        fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
+        details.push(`Cleared hooks from ${settingsPath}`);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`${settingsPath}: ${message}`);
+    }
+  }
+
+  const targets: { claudeDir: string; claudeMdPath: string }[] = [];
+  if (workspaceRootPath && workspaceManifest?.claude) {
+    targets.push({
+      claudeDir: path.join(workspaceRootPath, ".claude"),
+      claudeMdPath: path.join(workspaceRootPath, "CLAUDE.md"),
+    });
+  }
+  if (userManifest?.claude) {
+    const homeClaude = path.join(os.homedir(), ".claude");
+    targets.push({
+      claudeDir: homeClaude,
+      claudeMdPath: path.join(homeClaude, "CLAUDE.md"),
+    });
+  }
+
+  for (const { claudeDir, claudeMdPath } of targets) {
+    removeDir(path.join(claudeDir, "agents"));
+    removeDir(path.join(claudeDir, "rules"));
+    removeDir(path.join(claudeDir, "skills"));
+    removeDir(path.join(claudeDir, "hooks"));
+    removeFile(claudeMdPath);
+    clearHooksInSettings(path.join(claudeDir, "settings.json"));
+  }
+
+  if (workspaceRootPath && workspaceManifest?.claude) {
+    clearWorkspaceManifest(workspaceRootPath, ["claude"]);
+  }
+  if (userManifest?.claude) {
+    clearUserManifest(["claude"]);
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      message: "Failed to remove some Claude workflow files: " + errors.join("; "),
+      details,
+    };
+  }
+  const removed = targets.length > 0;
+  return {
+    success: true,
+    message: removed
+      ? "Claude Code workflow removed from recorded locations only."
+      : "No Claude workflow applied by this extension (nothing to remove).",
+    details: details.length > 0 ? details : undefined,
+  };
 }

@@ -4,9 +4,11 @@ import {
   getAdapter,
   recommendAssistant,
   detectAvailableAssistants,
+  removeWorkflowAll,
   type AIAssistant,
 } from "./adapters";
 import { installCodexSkills } from "./installCodexSkills";
+import { getAppliedWorkflowLog } from "./workflowManifest";
 
 export function activate(context: vscode.ExtensionContext): void {
   const basePath = context.extensionPath;
@@ -222,6 +224,49 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  const removeWorkflowAllCmd = vscode.commands.registerCommand(
+    "plan-code-review-workflow.removeWorkflowAll",
+    async () => {
+      const confirm = await vscode.window.showWarningMessage(
+        "Remove only the workflow items that this extension added (recorded in the manifest). Other commands/skills/rules will not be touched. Continue?",
+        { modal: true },
+        "Remove extension workflow only"
+      );
+      if (confirm !== "Remove extension workflow only") return;
+      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const result = await removeWorkflowAll({ extensionPath: basePath, workspaceRootPath });
+      if (result.success) {
+        const detail = result.details?.length ? "\n" + result.details.join("\n") : "";
+        vscode.window.showInformationMessage(result.message + detail, { modal: false });
+      } else {
+        vscode.window.showErrorMessage(result.message);
+      }
+    }
+  );
+
+  const showAppliedWorkflowLogCmd = vscode.commands.registerCommand(
+    "plan-code-review-workflow.showAppliedWorkflowLog",
+    () => {
+      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const { summary, workspace, user } = getAppliedWorkflowLog(workspaceRootPath);
+      const lines: string[] = [
+        "Plan-Code-Review Workflow — Applied items (only these are removed by \"Remove workflow from all\")",
+        "",
+        ...summary,
+      ];
+      if (workspace || user) {
+        lines.push("", "---", "Raw manifest (workspace):");
+        lines.push(workspace ? JSON.stringify(workspace, null, 2) : "(none)");
+        lines.push("", "Raw manifest (user):");
+        lines.push(user ? JSON.stringify(user, null, 2) : "(none)");
+      }
+      const content = lines.join("\n");
+      vscode.workspace.openTextDocument({ content, language: "plaintext" }).then((document) => {
+        vscode.window.showTextDocument(document, { preview: false });
+      });
+    }
+  );
+
   context.subscriptions.push(
     openGuide,
     openPublishing,
@@ -232,7 +277,9 @@ export function activate(context: vscode.ExtensionContext): void {
     applyWorkflowClaude,
     applyWorkflowCopilot,
     applyWorkflowCodex,
-    installCodexSkillsCmd
+    installCodexSkillsCmd,
+    removeWorkflowAllCmd,
+    showAppliedWorkflowLogCmd
   );
 }
 

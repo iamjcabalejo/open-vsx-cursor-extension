@@ -1,9 +1,17 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import type { AdapterContext, ApplyResult } from "./types";
-import { syncSkillsToCodexFromSource } from "../installCodexSkills";
+import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import { syncSkillsToCodexFromSource, removeCodexSkillsByNames } from "../installCodexSkills";
 import { buildCompoundingDevCycleContent } from "../compoundingDevCycle";
+import {
+  getWorkspaceManifest,
+  getUserManifest,
+  recordWorkspaceApplied,
+  recordUserApplied,
+  clearWorkspaceManifest,
+  clearUserManifest,
+} from "../workflowManifest";
 
 function buildAgentsMd(extensionPath: string): string {
   const rulesDir = path.join(extensionPath, ".cursor", "rules");
@@ -110,6 +118,18 @@ export async function applyCodex(context: AdapterContext): Promise<ApplyResult> 
     fs.writeFileSync(agentsMdPath, buildAgentsMd(extensionPath), "utf-8");
     details.push("AGENTS.md in workspace (rules + agent summaries)");
 
+    const skillNames = syncResult.installed ?? [];
+    recordUserApplied({
+      codex: {
+        skills: skillNames,
+        userAgents: true,
+        appliedAt: new Date().toISOString(),
+      },
+    });
+    recordWorkspaceApplied(workspaceRootPath, {
+      codex: { workspaceAgents: true, appliedAt: new Date().toISOString() },
+    });
+
     return {
       success: true,
       message:
@@ -124,4 +144,86 @@ export async function applyCodex(context: AdapterContext): Promise<ApplyResult> 
       details,
     };
   }
+}
+
+const CODEX_AGENTS_MARKER = "Plan-Code-Review workflow";
+
+/**
+ * Remove Codex workflow only from locations recorded in the manifest (extension-added only).
+ */
+export async function removeCodex(context: AdapterContext): Promise<RemoveResult> {
+  const { workspaceRootPath } = context;
+  const details: string[] = [];
+  const errors: string[] = [];
+  const workspaceManifest = getWorkspaceManifest(workspaceRootPath);
+  const userManifest = getUserManifest();
+
+  // Remove only skills we recorded in user manifest
+  const skillsToRemove = userManifest?.codex?.skills;
+  if (skillsToRemove?.length) {
+    const skillsResult = removeCodexSkillsByNames(skillsToRemove);
+    if (!skillsResult.success) {
+      return {
+        success: false,
+        message: skillsResult.message,
+        details: skillsResult.details,
+      };
+    }
+    if (skillsResult.details?.length) details.push(...skillsResult.details);
+  }
+
+  // Remove user AGENTS.md only if we recorded it
+  if (userManifest?.codex?.userAgents) {
+    const codexUserDir = path.join(os.homedir(), ".codex");
+    const userAgentsPath = path.join(codexUserDir, "AGENTS.md");
+    if (fs.existsSync(userAgentsPath)) {
+      try {
+        const content = fs.readFileSync(userAgentsPath, "utf-8");
+        if (content.includes(CODEX_AGENTS_MARKER)) {
+          fs.unlinkSync(userAgentsPath);
+          details.push("Removed ~/.codex/AGENTS.md");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${userAgentsPath}: ${message}`);
+      }
+    }
+  }
+  if (userManifest?.codex) {
+    clearUserManifest(["codex"]);
+  }
+
+  // Remove workspace AGENTS.md only if we recorded it
+  if (workspaceRootPath && workspaceManifest?.codex) {
+    const agentsPath = path.join(workspaceRootPath, "AGENTS.md");
+    if (fs.existsSync(agentsPath)) {
+      try {
+        const content = fs.readFileSync(agentsPath, "utf-8");
+        if (content.includes(CODEX_AGENTS_MARKER)) {
+          fs.unlinkSync(agentsPath);
+          details.push("Removed workspace AGENTS.md");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${agentsPath}: ${message}`);
+      }
+    }
+    clearWorkspaceManifest(workspaceRootPath, ["codex"]);
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      message: "Failed to remove some Codex workflow files: " + errors.join("; "),
+      details,
+    };
+  }
+  const removed = details.length > 0 || (skillsToRemove?.length ?? 0) > 0;
+  return {
+    success: true,
+    message: removed
+      ? "Codex workflow removed from recorded locations only."
+      : "No Codex workflow applied by this extension (nothing to remove).",
+    details: details.length > 0 ? details : undefined,
+  };
 }

@@ -1,7 +1,15 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import type { AdapterContext, ApplyResult } from "./types";
+import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import {
+  getWorkspaceManifest,
+  getUserManifest,
+  recordWorkspaceApplied,
+  recordUserApplied,
+  clearWorkspaceManifest,
+  clearUserManifest,
+} from "../workflowManifest";
 
 const SKIP_DIRS = new Set([".git", "node_modules", ".vscode-test"]);
 
@@ -59,6 +67,11 @@ export async function applyCursor(context: AdapterContext): Promise<ApplyResult>
     details.push(".cursor/ (rules, agents, skills, commands, hooks)");
     copyDirRecursive(pluginSrc, pluginDest);
     details.push(".cursor-plugin/ (plugin.json)");
+    if (isUser) {
+      recordUserApplied({ cursor: { appliedAt: new Date().toISOString() } });
+    } else {
+      recordWorkspaceApplied(workspaceRootPath!, { cursor: { appliedAt: new Date().toISOString() } });
+    }
     return {
       success: true,
       message: isUser
@@ -74,4 +87,65 @@ export async function applyCursor(context: AdapterContext): Promise<ApplyResult>
       details: [cursorSrc, pluginSrc],
     };
   }
+}
+
+/**
+ * Remove Cursor workflow only from locations recorded in the manifest (extension-added only).
+ */
+export async function removeCursor(context: AdapterContext): Promise<RemoveResult> {
+  const { workspaceRootPath } = context;
+  const details: string[] = [];
+  const errors: string[] = [];
+  const workspaceManifest = getWorkspaceManifest(workspaceRootPath);
+  const userManifest = getUserManifest();
+
+  function removeDir(dirPath: string): void {
+    if (fs.existsSync(dirPath)) {
+      try {
+        fs.rmSync(dirPath, { recursive: true });
+        details.push(`Removed ${dirPath}`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${dirPath}: ${message}`);
+      }
+    }
+  }
+
+  const home = os.homedir();
+  let clearedWorkspace = false;
+  let clearedUser = false;
+
+  if (workspaceRootPath && workspaceManifest?.cursor) {
+    removeDir(path.join(workspaceRootPath, ".cursor"));
+    removeDir(path.join(workspaceRootPath, ".cursor-plugin"));
+    clearedWorkspace = true;
+  }
+  if (userManifest?.cursor) {
+    removeDir(path.join(home, ".cursor"));
+    removeDir(path.join(home, ".cursor-plugin"));
+    clearedUser = true;
+  }
+
+  if (clearedWorkspace && workspaceRootPath) {
+    clearWorkspaceManifest(workspaceRootPath, ["cursor"]);
+  }
+  if (clearedUser) {
+    clearUserManifest(["cursor"]);
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      message: "Failed to remove some Cursor workflow files: " + errors.join("; "),
+      details,
+    };
+  }
+  const removed = clearedWorkspace || clearedUser;
+  return {
+    success: true,
+    message: removed
+      ? "Cursor workflow removed from recorded locations only."
+      : "No Cursor workflow applied by this extension (nothing to remove).",
+    details: details.length > 0 ? details : undefined,
+  };
 }

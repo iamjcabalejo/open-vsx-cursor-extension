@@ -37,6 +37,44 @@ function copyDirRecursive(srcDir: string, destDir: string): void {
 const CODEX_SKILLS_ROOT = path.join(os.homedir(), ".codex", "skills");
 
 /**
+ * Remove from ~/.codex/skills only the skill folders with the given names.
+ * Use this when removing only extension-installed skills (from manifest).
+ */
+export function removeCodexSkillsByNames(skillNames: string[]): InstallCodexSkillsResult {
+  const removed: string[] = [];
+  for (const name of skillNames) {
+    const destPath = path.join(CODEX_SKILLS_ROOT, name);
+    if (fs.existsSync(destPath)) {
+      try {
+        fs.rmSync(destPath, { recursive: true });
+        removed.push(name);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          success: false,
+          message: `Failed to remove skill "${name}": ${message}`,
+          details: [destPath],
+          installed: removed,
+        };
+      }
+    }
+  }
+  const details =
+    removed.length > 0
+      ? [`Removed from ${CODEX_SKILLS_ROOT}`, ...removed.map((n) => `  - ${n}`)]
+      : undefined;
+  return {
+    success: true,
+    message:
+      removed.length > 0
+        ? `Removed ${removed.length} skill(s) from Codex.`
+        : "No matching skills found in ~/.codex/skills.",
+    details,
+    installed: removed,
+  };
+}
+
+/**
  * Sync skill folders from a source directory to ~/.codex/skills.
  * Each subfolder must contain SKILL.md; others are skipped.
  * Existing skills with the same name are overwritten (updated).
@@ -119,6 +157,66 @@ export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexS
     details,
     installed,
     skipped,
+  };
+}
+
+/**
+ * Remove from ~/.codex/skills only the skill folders that exist in the extension's .cursor/skills.
+ * Does not remove other skills the user may have added.
+ */
+export function removeCodexSkillsFromExtension(extensionPath: string): InstallCodexSkillsResult {
+  const skillsSrcDir = path.join(extensionPath, ".cursor", "skills");
+  if (!fs.existsSync(skillsSrcDir)) {
+    return {
+      success: true,
+      message: "No skills source in extension; nothing to remove.",
+      details: [skillsSrcDir],
+    };
+  }
+
+  const removed: string[] = [];
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(skillsSrcDir, { withFileTypes: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      success: false,
+      message: `Failed to list extension skills: ${message}`,
+    };
+  }
+
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const destPath = path.join(CODEX_SKILLS_ROOT, e.name);
+    if (fs.existsSync(destPath)) {
+      try {
+        fs.rmSync(destPath, { recursive: true });
+        removed.push(e.name);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          success: false,
+          message: `Failed to remove skill "${e.name}": ${message}`,
+          details: [destPath],
+          installed: removed,
+        };
+      }
+    }
+  }
+
+  const details =
+    removed.length > 0
+      ? [`Removed from ${CODEX_SKILLS_ROOT}`, ...removed.map((name) => `  - ${name}`)]
+      : undefined;
+  return {
+    success: true,
+    message:
+      removed.length > 0
+        ? `Removed ${removed.length} skill(s) from Codex.`
+        : "No matching skills found in ~/.codex/skills.",
+    details,
+    installed: removed,
   };
 }
 

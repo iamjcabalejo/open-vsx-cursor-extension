@@ -1,7 +1,17 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import type { AdapterContext, ApplyResult } from "./types";
+import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import {
+  getWorkspaceManifest,
+  getUserManifest,
+  recordWorkspaceApplied,
+  recordUserApplied,
+  clearWorkspaceManifest,
+  clearUserManifest,
+} from "../workflowManifest";
+
+const INSTRUCTIONS_FILE_NAME = "plan-code-review-workflow.instructions.md";
 
 function stripFrontmatter(content: string): string {
   const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
@@ -120,17 +130,24 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
       "",
       userLevelContent,
     ].join("\n");
-    const instructionsFileName = "plan-code-review-workflow.instructions.md";
+    const instructionsFileName = INSTRUCTIONS_FILE_NAME;
     let userLevelWritten = 0;
+    const writtenPromptPaths: string[] = [];
     for (const promptsDir of getUserPromptsDirs()) {
       try {
         if (!fs.existsSync(promptsDir)) fs.mkdirSync(promptsDir, { recursive: true });
         const filePath = path.join(promptsDir, instructionsFileName);
         fs.writeFileSync(filePath, instructionsContent, "utf-8");
+        writtenPromptPaths.push(filePath);
         userLevelWritten++;
       } catch {
         // Skip if we can't write (e.g. dir not used by this IDE)
       }
+    }
+    if (userLevelWritten > 0) {
+      recordUserApplied({
+        copilot: { promptPaths: writtenPromptPaths, appliedAt: new Date().toISOString() },
+      });
     }
     if (userLevelWritten > 0) {
       details.push(
@@ -152,6 +169,11 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
     fs.writeFileSync(agentsPath, content, "utf-8");
     details.push("AGENTS.md (agent instructions at repo root)");
 
+    const copilotFiles = [".github/copilot-instructions.md", "AGENTS.md"];
+    recordWorkspaceApplied(workspaceRootPath, {
+      copilot: { files: copilotFiles, appliedAt: new Date().toISOString() },
+    });
+
     return {
       success: true,
       message:
@@ -166,4 +188,64 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
       details,
     };
   }
+}
+
+/**
+ * Remove GitHub Copilot workflow only from paths recorded in the manifest (extension-added only).
+ */
+export async function removeCopilot(context: AdapterContext): Promise<RemoveResult> {
+  const { workspaceRootPath } = context;
+  const details: string[] = [];
+  const errors: string[] = [];
+  const workspaceManifest = getWorkspaceManifest(workspaceRootPath);
+  const userManifest = getUserManifest();
+
+  // Remove only user prompt files we recorded
+  if (userManifest?.copilot?.promptPaths?.length) {
+    for (const filePath of userManifest.copilot.promptPaths) {
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+          details.push(`Removed ${filePath}`);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          errors.push(`${filePath}: ${message}`);
+        }
+      }
+    }
+    clearUserManifest(["copilot"]);
+  }
+
+  // Remove only workspace files we recorded
+  if (workspaceRootPath && workspaceManifest?.copilot?.files?.length) {
+    for (const rel of workspaceManifest.copilot.files) {
+      const filePath = path.join(workspaceRootPath, rel);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+          details.push(`Removed ${filePath}`);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          errors.push(`${filePath}: ${message}`);
+        }
+      }
+    }
+    clearWorkspaceManifest(workspaceRootPath, ["copilot"]);
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      message: "Failed to remove some Copilot workflow files: " + errors.join("; "),
+      details,
+    };
+  }
+  const removed = details.length > 0;
+  return {
+    success: true,
+    message: removed
+      ? "GitHub Copilot workflow removed from recorded paths only."
+      : "No Copilot workflow applied by this extension (nothing to remove).",
+    details: details.length > 0 ? details : undefined,
+  };
 }

@@ -20,6 +20,9 @@ export interface ApplyResult {
   details?: string[];
 }
 
+/** Same shape as ApplyResult; used for remove operations. */
+export type RemoveResult = ApplyResult;
+
 /** Adapter that applies this extension's workflow to a specific AI assistant. */
 export interface WorkflowAdapter {
   id: AIAssistant;
@@ -28,4 +31,6 @@ export interface WorkflowAdapter {
   /** VS Code extension ID used to detect if this assistant is available. */
   extensionId?: string;
   apply(context: AdapterContext): Promise<ApplyResult>;
+  /** Remove workflow artifacts added by this extension. Optional; if absent, remove is no-op. */
+  remove?(context: AdapterContext): Promise<RemoveResult>;
 }
