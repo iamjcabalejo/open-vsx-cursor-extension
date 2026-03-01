@@ -1,1 +1,69 @@
-{"name":"plan-code-review-workflow","displayName":"Plan-Code-Review Workflow","description":"Apply the Plan → Code → Review cycle to Cursor, Claude Code, GitHub Copilot, or Codex. One workflow, automatic code review, production-ready features.","version":"4.1.0","publisher":"JhonCabalejo","license":"MIT","repository":{"type":"git","url":"https://github.com/iamjcabalejo/open-vsx-cursor-extension.git"},"engines":{"vscode":"^1.80.0"},"categories":["Other","Snippets","Formatters"],"keywords":["productivity","nextjs","supabase","typescript","react","api","development","mcp","cursor","agents"],"main":"./out/extension.js","activationEvents":["onCommand:plan-code-review-workflow.openGuide","onCommand:plan-code-review-workflow.openPublishing","onCommand:plan-code-review-workflow.applyWorkflowCurrent","onCommand:plan-code-review-workflow.applyWorkflowPick","onCommand:plan-code-review-workflow.applyWorkflowCursor","onCommand:plan-code-review-workflow.applyWorkflowClaude","onCommand:plan-code-review-workflow.applyWorkflowCopilot","onCommand:plan-code-review-workflow.applyWorkflowCodex","onCommand:plan-code-review-workflow.openDevGuide","onCommand:plan-code-review-workflow.installCodexSkills","onCommand:plan-code-review-workflow.removeWorkflowAll","onCommand:plan-code-review-workflow.showAppliedWorkflowLog"],"contributes":{"commands":[{"command":"plan-code-review-workflow.openGuide","title":"Plan-Code-Review: Open Guide"},{"command":"plan-code-review-workflow.openPublishing","title":"Plan-Code-Review: Open Publishing Guide"},{"command":"plan-code-review-workflow.openDevGuide","title":"Plan-Code-Review: Open Developer Guide"},{"command":"plan-code-review-workflow.applyWorkflowCurrent","title":"Plan-Code-Review: Apply workflow for current AI"},{"command":"plan-code-review-workflow.applyWorkflowPick","title":"Plan-Code-Review: Apply workflow for… (choose AI)"},{"command":"plan-code-review-workflow.applyWorkflowCursor","title":"Plan-Code-Review: Apply workflow for Cursor"},{"command":"plan-code-review-workflow.applyWorkflowClaude","title":"Plan-Code-Review: Apply workflow for Claude Code"},{"command":"plan-code-review-workflow.applyWorkflowCopilot","title":"Plan-Code-Review: Apply workflow for GitHub Copilot"},{"command":"plan-code-review-workflow.applyWorkflowCodex","title":"Plan-Code-Review: Apply workflow for Codex"},{"command":"plan-code-review-workflow.installCodexSkills","title":"Plan-Code-Review: Install skills to Codex (~/.codex/skills)"},{"command":"plan-code-review-workflow.removeWorkflowAll","title":"Plan-Code-Review: Remove workflow from all AI assistants"},{"command":"plan-code-review-workflow.showAppliedWorkflowLog","title":"Plan-Code-Review: Show applied workflow log"}]},"scripts":{"vscode:prepublish":"npm run compile","compile":"tsc -p ./","watch":"tsc -watch -p ./"},"devDependencies":{"@types/node":"^20.19.35","@types/vscode":"^1.80.0","typescript":"^5.3.0"}}
+{
+  "name": "plan-code-review-workflow",
+  "displayName": "Plan-Code-Review Workflow",
+  "description": "Apply the Plan → Code → Review cycle to Cursor, Claude Code, GitHub Copilot, or Codex. One workflow, automatic code review, production-ready features.",
+  "version": "4.2.0",
+  "publisher": "JhonCabalejo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamjcabalejo/open-vsx-cursor-extension.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other", "Snippets", "Formatters"],
+  "keywords": [
+    "productivity",
+    "nextjs",
+    "supabase",
+    "typescript",
+    "react",
+    "api",
+    "development",
+    "mcp",
+    "cursor",
+    "agents"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:plan-code-review-workflow.openGuide",
+    "onCommand:plan-code-review-workflow.openPublishing",
+    "onCommand:plan-code-review-workflow.applyWorkflowCurrent",
+    "onCommand:plan-code-review-workflow.applyWorkflowPick",
+    "onCommand:plan-code-review-workflow.applyWorkflowCursor",
+    "onCommand:plan-code-review-workflow.applyWorkflowClaude",
+    "onCommand:plan-code-review-workflow.applyWorkflowCopilot",
+    "onCommand:plan-code-review-workflow.applyWorkflowCodex",
+    "onCommand:plan-code-review-workflow.openDevGuide",
+    "onCommand:plan-code-review-workflow.installCodexSkills",
+    "onCommand:plan-code-review-workflow.removeWorkflowAll",
+    "onCommand:plan-code-review-workflow.showAppliedWorkflowLog"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "plan-code-review-workflow.openGuide", "title": "Plan-Code-Review: Open Guide" },
+      { "command": "plan-code-review-workflow.openPublishing", "title": "Plan-Code-Review: Open Publishing Guide" },
+      { "command": "plan-code-review-workflow.openDevGuide", "title": "Plan-Code-Review: Open Developer Guide" },
+      { "command": "plan-code-review-workflow.applyWorkflowCurrent", "title": "Plan-Code-Review: Apply workflow for current AI" },
+      { "command": "plan-code-review-workflow.applyWorkflowPick", "title": "Plan-Code-Review: Apply workflow for… (choose AI)" },
+      { "command": "plan-code-review-workflow.applyWorkflowCursor", "title": "Plan-Code-Review: Apply workflow for Cursor" },
+      { "command": "plan-code-review-workflow.applyWorkflowClaude", "title": "Plan-Code-Review: Apply workflow for Claude Code" },
+      { "command": "plan-code-review-workflow.applyWorkflowCopilot", "title": "Plan-Code-Review: Apply workflow for GitHub Copilot" },
+      { "command": "plan-code-review-workflow.applyWorkflowCodex", "title": "Plan-Code-Review: Apply workflow for Codex" },
+      { "command": "plan-code-review-workflow.installCodexSkills", "title": "Plan-Code-Review: Install skills to Codex (~/.codex/skills)" },
+      { "command": "plan-code-review-workflow.removeWorkflowAll", "title": "Plan-Code-Review: Remove workflow from all AI assistants" },
+      { "command": "plan-code-review-workflow.showAppliedWorkflowLog", "title": "Plan-Code-Review: Show applied workflow log" }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.35",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.0"
+  }
+}

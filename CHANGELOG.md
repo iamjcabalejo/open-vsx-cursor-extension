@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.2.0] - 2026-03-01
+
+### Added
+
+- **Remove workflow from all AI assistants**: Command removes only items added by this extension (recorded in workspace/user manifest). Existing commands, skills, rules, and hooks from other sources are left unchanged.
+- **Show applied workflow log**: Command opens a summary and raw manifest of what the extension has applied (workspace and user), so you can see exactly what would be removed.
+- **Manifest tracking**: Applying workflow now writes `.plan-code-review-workflow-applied.json` (workspace) and `~/.plan-code-review-workflow-applied.json` (user) to record applied paths; remove uses these to delete only extension-added items.
+
 ## [4.1.0] - 2026-03-01
 
 ### Added
