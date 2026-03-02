@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import { buildCompoundingDevCycleContent } from "../compoundingDevCycle";
 import {
   getWorkspaceManifest,
   getUserManifest,
@@ -88,6 +89,324 @@ function buildUserLevelInstructionsMd(extensionPath: string): string {
   return [rules.trimEnd(), "", "---", "", skillsSection.trimEnd(), ""].join("\n");
 }
 
+/**
+ * Map from agent base name (filename without .md) to skill folder names under .cursor/skills.
+ * Matches "Skills by Agent" in .cursor/skills/README.md. GitHub Copilot has no separate skills; we inline these into each agent.
+ */
+const AGENT_SKILLS: Record<string, string[]> = {
+  "backend-architect": [
+    "api-design-patterns",
+    "api-testing",
+    "postgresql",
+    "nosql-databases",
+    "refactoring-checklist",
+    "code-review",
+  ],
+  "backend-reviewer": ["api-design-patterns", "api-testing", "code-review", "security-audit"],
+  "frontend-architect": [
+    "refactoring-checklist",
+    "code-review",
+    "accessibility-checklist",
+    "performance-profiling",
+    "e2e-playwright",
+  ],
+  "frontend-reviewer": [
+    "code-review",
+    "accessibility-checklist",
+    "performance-profiling",
+    "e2e-playwright",
+  ],
+  "database-expert": ["postgresql", "nosql-databases"],
+  "refactoring-expert": ["refactoring-checklist"],
+  "performance-engineer": ["performance-profiling"],
+  "e2e-runner": ["e2e-playwright"],
+  "security-engineer": ["security-audit"],
+  "requirements-analyst": ["requirements-discovery"],
+  "technical-writer": ["docs-structure"],
+};
+
+/** Read skill content from .cursor/skills/<skillName>/SKILL.md (without frontmatter). Returns empty string if missing. */
+function getSkillContent(extensionPath: string, skillName: string): string {
+  const skillPath = path.join(extensionPath, ".cursor", "skills", skillName, "SKILL.md");
+  if (!fs.existsSync(skillPath)) return "";
+  try {
+    const raw = fs.readFileSync(skillPath, "utf-8");
+    return stripFrontmatter(raw);
+  } catch {
+    return "";
+  }
+}
+
+/** Build agent content with inlined skills for GitHub Copilot (no separate skills system). */
+function buildAgentContentWithSkills(
+  extensionPath: string,
+  agentContent: string,
+  agentBaseName: string
+): string {
+  const skillNames = AGENT_SKILLS[agentBaseName];
+  if (!skillNames || skillNames.length === 0) {
+    return (
+      agentContent +
+      "\n\n---\n\n## Skills (for GitHub Copilot)\n\nNo additional skills defined for this agent; apply the compounding dev cycle and project rules.\n"
+    );
+  }
+  const parts: string[] = [
+    agentContent,
+    "",
+    "---",
+    "",
+    "## Skills (inlined for GitHub Copilot)",
+    "",
+    "GitHub Copilot does not load skills separately. The following skills apply to this agent; apply them when acting as this agent.",
+    "",
+  ];
+  for (const skillName of skillNames) {
+    const content = getSkillContent(extensionPath, skillName);
+    if (!content) continue;
+    parts.push("### " + skillName);
+    parts.push("");
+    parts.push(content);
+    parts.push("");
+  }
+  return parts.join("\n");
+}
+
+/** Custom agents: copy .cursor/agents/*.md to workspace .github/agents/<name>.agent.md with skills inlined. Returns relative paths written. */
+function syncCustomAgentsToGitHub(
+  extensionPath: string,
+  workspaceRootPath: string
+): string[] {
+  const agentsDir = path.join(extensionPath, ".cursor", "agents");
+  const githubAgentsDir = path.join(workspaceRootPath, ".github", "agents");
+  const written: string[] = [];
+  if (!fs.existsSync(agentsDir)) return written;
+  if (!fs.existsSync(githubAgentsDir)) fs.mkdirSync(githubAgentsDir, { recursive: true });
+  const files = fs.readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+  for (const f of files) {
+    const baseName = f.replace(/\.md$/, "");
+    const destName = `${baseName}.agent.md`;
+    const destPath = path.join(githubAgentsDir, destName);
+    const srcPath = path.join(agentsDir, f);
+    const agentContent = fs.readFileSync(srcPath, "utf-8");
+    const contentWithSkills = buildAgentContentWithSkills(extensionPath, agentContent, baseName);
+    fs.writeFileSync(destPath, contentWithSkills, "utf-8");
+    written.push(path.join(".github", "agents", destName));
+  }
+  return written;
+}
+
+/** Build AGENTS.md for workspace: compounding dev cycle first, then custom agents in .github/agents (must follow cycle). */
+function buildAgentsMd(extensionPath: string): string {
+  const agentsDir = path.join(extensionPath, ".cursor", "agents");
+  const cycleContent = buildCompoundingDevCycleContent(extensionPath);
+  const parts: string[] = [
+    "# AGENTS.md — Compounding dev cycle and custom agents",
+    "",
+    "**All custom agents and work in this repo MUST follow the compounding development cycle** (Plan → Code → Review/Test → Plan). See below.",
+    "",
+    "---",
+    "",
+    "## Compounding development cycle",
+    "",
+    cycleContent,
+    "",
+    "---",
+    "",
+    "## Custom agents (GitHub Copilot)",
+    "",
+    "Custom agents are stored as `<name>.agent.md` under **`.github/agents/`**. When adding or editing agents:",
+    "",
+    "1. Create or update files in **`.github/agents/`** with the naming convention **`<name>.agent.md`**.",
+    "2. **Always follow the compounding dev cycle** defined above: Plan (scope, acceptance criteria, technical approach) → Code (implementation, tests, implementation notes) → Review/Test (review summary, rework list, gates) → Plan (next iteration if rework).",
+    "3. Each agent definition should reference this cycle and produce handoff artifacts (plan doc, implementation notes, rework list) so the next phase or agent can continue without loss of context.",
+    "4. **Skills**: Because GitHub Copilot does not load skills separately, each `.github/agents/<name>.agent.md` file includes **inlined skills** (checklists, patterns, and criteria for that agent). When acting as an agent, apply the skills section at the bottom of its file.",
+    "",
+    "**Repository layout for GitHub Copilot:**",
+    "",
+    "- **`.github/agents/`** — Custom agents (`<name>.agent.md`); follow compounding dev cycle.",
+    "- **`.github/copilot-instructions.md`** — Rules and agent roles (project-wide instructions).",
+    "- **`.github/workflows/`** — Hooks (hooks.json, README, scripts for session/audit/format).",
+    "- **`.github/ISSUE_TEMPLATE/`** — Structured prompts (feature, bug report, review request) for the Plan phase.",
+    "",
+  ];
+  if (fs.existsSync(agentsDir)) {
+    const files = fs.readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+    if (files.length > 0) {
+      parts.push("**Agent files in this workspace** (`.github/agents/*.agent.md`):");
+      parts.push("");
+      for (const f of files) {
+        const baseName = f.replace(/\.md$/, "");
+        const raw = fs.readFileSync(path.join(agentsDir, f), "utf-8");
+        const nameMatch = raw.match(/name:\s*(\S+)/);
+        const descMatch = raw.match(/description:\s*(.+)/);
+        const name = nameMatch ? nameMatch[1] : baseName;
+        const desc = descMatch ? descMatch[1].trim() : "";
+        parts.push(`- **${name}** (${baseName}.agent.md): ${desc}`);
+      }
+      parts.push("");
+    }
+  }
+  parts.push("---");
+  parts.push("*Generated by Plan-Code-Review Workflow extension for GitHub Copilot.*");
+  return parts.join("\n");
+}
+
+/** .github/workflows/ ← hooks: hooks.json + README + script copies. Returns relative paths written. */
+function syncWorkflowsToGitHub(
+  extensionPath: string,
+  workspaceRootPath: string
+): string[] {
+  const written: string[] = [];
+  const workflowsDir = path.join(workspaceRootPath, ".github", "workflows");
+  if (!fs.existsSync(workflowsDir)) fs.mkdirSync(workflowsDir, { recursive: true });
+
+  const hooksJsonPath = path.join(extensionPath, ".cursor", "hooks.json");
+  if (fs.existsSync(hooksJsonPath)) {
+    const hooksJson = fs.readFileSync(hooksJsonPath, "utf-8");
+    const parsed = JSON.parse(hooksJson) as { hooks?: Record<string, Array<{ command?: string; timeout?: number }>> };
+    const hooks = parsed?.hooks ?? {};
+    const rewritten: Record<string, Array<{ command: string; timeout?: number }>> = {};
+    const scriptNames = ["format.sh", "audit.sh", "session-init.sh"];
+    for (const [event, entries] of Object.entries(hooks)) {
+      const arr = Array.isArray(entries) ? entries : [];
+      rewritten[event] = arr.map((e) => {
+        const cmd = (e && typeof e === "object" && e.command) || "";
+        const name = path.basename(cmd);
+        const newCmd = scriptNames.includes(name)
+          ? ".github/workflows/" + name
+          : cmd;
+        return { ...e, command: newCmd };
+      });
+    }
+    const destHooksPath = path.join(workflowsDir, "hooks.json");
+    fs.writeFileSync(destHooksPath, JSON.stringify({ hooks: rewritten }, null, 2), "utf-8");
+    written.push(path.join(".github", "workflows", "hooks.json"));
+  }
+
+  const hooksReadmePath = path.join(extensionPath, ".cursor", "hooks", "README.md");
+  if (fs.existsSync(hooksReadmePath)) {
+    const readme = fs.readFileSync(hooksReadmePath, "utf-8");
+    const destReadme = path.join(workflowsDir, "README.md");
+    fs.writeFileSync(destReadme, readme, "utf-8");
+    written.push(path.join(".github", "workflows", "README.md"));
+  }
+
+  const cursorHooksDir = path.join(extensionPath, ".cursor", "hooks");
+  const scriptNames = ["format.sh", "audit.sh", "session-init.sh"];
+  for (const name of scriptNames) {
+    const src = path.join(cursorHooksDir, name);
+    if (fs.existsSync(src)) {
+      const content = fs.readFileSync(src, "utf-8");
+      const dest = path.join(workflowsDir, name);
+      fs.writeFileSync(dest, content, "utf-8");
+      written.push(path.join(".github", "workflows", name));
+    }
+  }
+  return written;
+}
+
+/** .github/ISSUE_TEMPLATE/ ← structured prompts for Plan phase / Copilot. Returns relative paths written. */
+function syncIssueTemplatesToGitHub(
+  _extensionPath: string,
+  workspaceRootPath: string
+): string[] {
+  const written: string[] = [];
+  const templateDir = path.join(workspaceRootPath, ".github", "ISSUE_TEMPLATE");
+  if (!fs.existsSync(templateDir)) fs.mkdirSync(templateDir, { recursive: true });
+
+  const templates: { name: string; content: string }[] = [
+    {
+      name: "feature.md",
+      content: `---
+name: Feature (structured prompt)
+description: New feature or enhancement — use as structured prompt for Plan phase
+title: "[Feature] "
+labels: ["enhancement", "plan"]
+assignees: []
+---
+
+## Goal
+<!-- What should this feature achieve? -->
+
+## Scope
+- **In scope:**
+- **Out of scope:**
+
+## Acceptance criteria
+- [ ] 
+- [ ] 
+
+## Technical approach (optional)
+<!-- APIs, data model, key components -->
+
+## Notes
+<!-- Links, references, constraints. Follow Plan → Code → Review/Test → Plan (see AGENTS.md). -->
+`,
+    },
+    {
+      name: "bug_report.md",
+      content: `---
+name: Bug report (structured prompt)
+description: Report a bug — use as structured prompt for reproduction and fix
+title: "[Bug] "
+labels: ["bug"]
+assignees: []
+---
+
+## Summary
+<!-- Brief description of the bug -->
+
+## Steps to reproduce
+1. 
+2. 
+3. 
+
+## Expected behavior
+<!-- What should happen -->
+
+## Actual behavior
+<!-- What actually happens -->
+
+## Environment (optional)
+<!-- OS, runtime, versions -->
+
+## Notes
+<!-- Follow Plan → Code → Review/Test → Plan; fix should have tests and implementation notes (see AGENTS.md). -->
+`,
+    },
+    {
+      name: "review_request.md",
+      content: `---
+name: Review request (structured prompt)
+description: Request code review — structured prompt for Review/Test phase
+title: "[Review] "
+labels: ["review"]
+assignees: []
+---
+
+## What changed
+<!-- Summary of changes; link to plan or PR -->
+
+## Plan / acceptance criteria
+<!-- Link to plan doc or list AC this change implements -->
+
+## Review focus (optional)
+<!-- API contract, security, a11y, tests, etc. -->
+
+## Notes
+<!-- Reviewers: produce review summary, rework list (file/line + change + severity), test status. See AGENTS.md and .github/agents/ for reviewer agents. -->
+`,
+    },
+  ];
+
+  for (const t of templates) {
+    const dest = path.join(templateDir, t.name);
+    fs.writeFileSync(dest, t.content, "utf-8");
+    written.push(path.join(".github", "ISSUE_TEMPLATE", t.name));
+  }
+  return written;
+}
+
 /** User-level prompts directories for GitHub Copilot / VS Code (Code and Cursor). */
 function getUserPromptsDirs(): string[] {
   const home = os.homedir();
@@ -164,12 +483,36 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
     fs.writeFileSync(copilotPath, content, "utf-8");
     details.push(".github/copilot-instructions.md");
 
-    // AGENTS.md at root (Copilot and Codex both use it)
-    const agentsPath = path.join(workspaceRootPath, "AGENTS.md");
-    fs.writeFileSync(agentsPath, content, "utf-8");
-    details.push("AGENTS.md (agent instructions at repo root)");
+    // .github/agents/<name>.agent.md — custom agents (GitHub Copilot convention); always follow compounding dev cycle
+    const agentRelPaths = syncCustomAgentsToGitHub(extensionPath, workspaceRootPath);
+    if (agentRelPaths.length > 0) {
+      details.push(".github/agents/ (" + agentRelPaths.length + " agent(s) as <name>.agent.md)");
+    }
 
-    const copilotFiles = [".github/copilot-instructions.md", "AGENTS.md"];
+    // .github/workflows/ ← hooks (hooks.json + README + scripts)
+    const workflowRelPaths = syncWorkflowsToGitHub(extensionPath, workspaceRootPath);
+    if (workflowRelPaths.length > 0) {
+      details.push(".github/workflows/ (hooks: hooks.json, README, scripts)");
+    }
+
+    // .github/ISSUE_TEMPLATE/ ← structured prompts (feature, bug, review)
+    const issueTemplateRelPaths = syncIssueTemplatesToGitHub(extensionPath, workspaceRootPath);
+    if (issueTemplateRelPaths.length > 0) {
+      details.push(".github/ISSUE_TEMPLATE/ (" + issueTemplateRelPaths.length + " structured prompt(s))");
+    }
+
+    // AGENTS.md at root: compounding dev cycle + custom agents reference (must follow cycle)
+    const agentsPath = path.join(workspaceRootPath, "AGENTS.md");
+    fs.writeFileSync(agentsPath, buildAgentsMd(extensionPath), "utf-8");
+    details.push("AGENTS.md (compounding dev cycle + custom agents in .github/agents/)");
+
+    const copilotFiles = [
+      ".github/copilot-instructions.md",
+      "AGENTS.md",
+      ...agentRelPaths,
+      ...workflowRelPaths,
+      ...issueTemplateRelPaths,
+    ];
     recordWorkspaceApplied(workspaceRootPath, {
       copilot: { files: copilotFiles, appliedAt: new Date().toISOString() },
     });
@@ -177,7 +520,7 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
     return {
       success: true,
       message:
-        "GitHub Copilot workflow applied: user-level rules, agents, skills + workspace instructions.",
+        "GitHub Copilot workflow applied: .github/ (agents, copilot-instructions.md, workflows/hooks, ISSUE_TEMPLATE) + AGENTS.md.",
       details,
     };
   } catch (err) {
@@ -223,10 +566,27 @@ export async function removeCopilot(context: AdapterContext): Promise<RemoveResu
       if (fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);
-          details.push(`Removed ${filePath}`);
+          details.push(`Removed ${rel}`);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          errors.push(`${filePath}: ${message}`);
+          errors.push(`${rel}: ${message}`);
+        }
+      }
+    }
+    const githubAgentsDir = path.join(workspaceRootPath, ".github", "agents");
+    const githubWorkflowsDir = path.join(workspaceRootPath, ".github", "workflows");
+    const githubIssueTemplateDir = path.join(workspaceRootPath, ".github", "ISSUE_TEMPLATE");
+    for (const dir of [githubAgentsDir, githubWorkflowsDir, githubIssueTemplateDir]) {
+      if (fs.existsSync(dir)) {
+        try {
+          const remaining = fs.readdirSync(dir);
+          if (remaining.length === 0) {
+            fs.rmdirSync(dir);
+            const rel = path.relative(workspaceRootPath, dir);
+            details.push("Removed " + rel + "/ (was empty)");
+          }
+        } catch {
+          // Ignore if not empty or permission issue
         }
       }
     }

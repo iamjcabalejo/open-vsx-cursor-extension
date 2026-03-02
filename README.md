@@ -63,7 +63,7 @@ The extension keeps a manifest of what it applied (workspace and user). Remove u
 |---------------|-------------------|
 | **Cursor**    | `.cursor/`, `.cursor-plugin/` — full slash commands, agents, rules, hooks |
 | **Claude Code** | `.claude/agents/`, `.claude/rules/`, `.claude/skills/`, `CLAUDE.md`, `.claude/hooks/` — in project root **or** in `~/.claude/` (you choose when applying) |
-| **GitHub Copilot** | User-level: **rules, agents, skills** in **prompts** folder (all workspaces). Workspace: `.github/copilot-instructions.md`, `AGENTS.md` |
+| **GitHub Copilot** | User-level: **rules, agents, skills** in **prompts** folder (all workspaces). Workspace: **`.github/`** — **`agents/`** (custom agents as `<name>.agent.md`, skills inlined), **`copilot-instructions.md`** (rules), **`workflows/`** (hooks), **`ISSUE_TEMPLATE/`** (structured prompts); **`AGENTS.md`** at repo root (compounding dev cycle). |
 | **Codex**     | User-level: **~/.codex/AGENTS.md** (compounding dev cycle) + **~/.codex/skills/** (synced). Workspace: `AGENTS.md` |
 
 **Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. “Follow CLAUDE.md”, “Use the code-review skill”).
