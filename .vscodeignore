@@ -12,3 +12,4 @@ node_modules
 docs/**
 **/*.map
 **/.git/**
+# workflow/** must NOT be excluded — package contains workflow/cursor, workflow/claude, workflow/copilot, workflow/codex for Apply commands

@@ -1,0 +1,145 @@
+# Compounding Development Cycle
+
+Follow **Plan → Code → Review/Test → Plan** for every feature or change. Each phase produces handoff artifacts so the next agent can continue without loss of context. **Switch modes explicitly** as you progress through phases; each mode has distinct responsibilities and output expectations.
+
+---
+
+## Mode switching
+
+Each mode has distinct responsibilities and output expectations.
+
+### ASK mode (Phase 1a: Plan discovery)
+
+- **Entry:** When receiving a user request without clear scope or acceptance criteria.
+- **Behavior:** Ask clarifying questions; gather requirements; validate assumptions.
+- **Output:** Structured requirements (may be informal notes or structured as RFC/issue).
+- **Exit:** When scope, constraints, and success criteria are unambiguous.
+
+### PLAN mode (Phase 1b: Plan authoring)
+
+- **Entry:** After ASK completes (or when scope is already clear); begin authoring the plan artifact.
+- **Behavior:** Write scope, acceptance criteria, technical approach, and task list; reference project rules.
+- **Output:** Single written plan document (e.g. `docs/plans/<feature>.md` or ticket with complete AC).
+- **Exit:** When another agent can implement from the plan without guessing.
+
+### AGENT mode (Phases 2–3: Execute & review)
+
+- **Entry:** After PLAN artifact is handed off.
+- **Behavior:** Implement code (Phase 2), write tests, produce implementation notes; OR review/test and produce rework list (Phase 3).
+- **Output:** Code changes + tests + implementation notes (Phase 2); OR review summary + rework list (Phase 3).
+- **Exit/Loop:** If Critical rework items → new cycle (back to ASK or PLAN for rework scope); if no Critical issues → production ready.
+
+---
+
+## Mode transition guide
+
+### Initial cycle: user request → production ready
+
+1. **ASK** — User provides request; ask clarifying questions until scope is clear.
+2. **PLAN** — Author plan doc with full scope, AC, approach, and task list.
+3. **AGENT (Code)** — Implement to plan; produce code + tests + impl notes.
+4. **AGENT (Review/Test)** — Validate against plan; produce rework list.
+5. **Decision:** No Critical issues? → **Production ready**. Critical issues? → Go to step 6.
+
+### Rework cycle: critical issues → production ready
+
+6. **PLAN (brief)** — Turn rework items into new AC; update plan doc (e.g. `docs/plans/<feature>-rework-N.md`).
+7. **AGENT (Code)** — Fix Critical items per rework list.
+8. **AGENT (Review/Test)** — Re-validate; produce new rework list.
+9. **Loop** — Repeat from step 6 until no Critical issues → **Production ready**.
+
+### Quick tips
+
+- **ASK mode:** Stay until you can write unambiguous AC.
+- **PLAN mode:** Don't jump to code until plan is reviewed and locked.
+- **AGENT mode:** Respect the plan; changes to scope = new PLAN cycle.
+- **Handoffs:** Each phase ends with explicit artifacts (written, not verbal).
+
+---
+
+## 1. Plan
+
+**Goal:** Unambiguous scope, acceptance criteria, and technical approach before implementation.
+
+**Modes:** When scope is unclear, run **ASK** (Plan discovery) first; then **PLAN** (Plan authoring). When the user request already has clear scope and AC, go directly to **PLAN**.
+
+**Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
+
+**Outputs (handoff to Code):**
+- **Scope:** What is in/out; dependencies and boundaries.
+- **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
+- **Technical approach:** Key components, APIs, data shapes; references to existing rules (e.g. `core-standards.md`, `api-routes.md`).
+- **Task list:** Ordered implementation steps; optional rough file/area mapping.
+
+**Artifact:** Prefer a single plan doc (e.g. `docs/plans/<feature>.md` or ticket) that Code can open and follow. Use `feature-plan` to produce the plan file; use `project-manager` with that plan to run the full cycle (Code → Review/Test → Plan if needed → repeat until production ready).
+
+**Agents:** requirements-analyst (discovery), tech-stack-researcher (choices), backend-architect / frontend-architect (design). One agent can own the final plan; others feed into it.
+
+**Handoff rule:** Plan is complete when another agent can implement without guessing scope or acceptance.
+
+---
+
+## 2. Code
+
+**Goal:** Implement exactly to the plan; preserve handoff for Review/Test.
+
+**Mode:** **AGENT** (Execute). No planning or discovery; implement only to the plan artifact.
+
+**Inputs:** Plan artifact, project rules (core-standards, api-routes, typescript, react, e2e-tests), existing code.
+
+**Outputs (handoff to Review/Test):**
+- **Implementation:** Code that satisfies acceptance criteria and project standards.
+- **Tests:** Unit/integration/API tests for new behavior; follow `api-test` / E2E patterns where relevant.
+- **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes. Use this minimal template for consistency:
+  - **Done:** What was implemented (and which AC it maps to, if applicable).
+  - **Deferred:** What was explicitly postponed with a brief reason.
+  - **Assumptions:** Any assumptions about environment, dependencies, or behavior.
+  - **Env/config:** Required env vars, config changes, or setup steps.
+
+**Discipline:** Do not expand scope beyond the plan without updating the plan first. If the plan is wrong, note it and either adjust the plan doc or hand back to Plan for a quick revision.
+
+**Agents:** backend-architect, frontend-architect, database-expert, or general implementation. Match agent to the changed areas.
+
+**Handoff rule:** Review/Test must see a clear diff, the plan's acceptance criteria, and the implementation notes so they can verify and test.
+
+---
+
+## 3. Review / Test
+
+**Goal:** Verify behavior, standards, and security; produce a clear pass/fail and rework list.
+
+**Mode:** **AGENT** (Review/Test). Read-only review output (rework list, summary); do not apply changes unless explicitly asked.
+
+**Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
+
+**Outputs (handoff to Plan or Code):**
+- **Review summary:** Alignment with plan, adherence to core-standards and api-routes, security and performance notes.
+- **Test status:** Which acceptance criteria are covered; any failing or missing tests.
+- **Rework list:** Concrete, actionable items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**. No vague "improve X."
+
+**Gates:** All acceptance criteria covered by tests; no known violations of project rules; no unresolved high-severity security or data-integrity issues. **Code is production ready when gates pass and there are no Critical rework items.**
+
+**Agents:** backend-reviewer, frontend-reviewer (project-manager triggers these **code reviewers** automatically after Code); optionally security-engineer, performance-engineer when in scope. **E2E testing is not auto-triggered**—the user runs it when they want (e.g. e2e-runner or running the test suite).
+
+**Handoff rule:** If there are **Critical** rework items or gates not passed, feed back into **Plan** (rework = new AC), then **Code** (fix), then **Review/Test** again. Repeat until gates pass and no Critical issues—then code is **finalized and production ready**. If only trivial/suggestion rework, hand to **Code** with the rework list and re-run Review/Test.
+
+---
+
+## 4. Plan (next iteration)
+
+**Goal:** Treat rework or new scope as a new cycle so nothing is dropped.
+
+**Mode:** **PLAN** (brief). Rework plan only; no implementation until Code phase.
+
+**Inputs:** Rework list from Review/Test (especially **Critical** items), or new user request.
+
+**Process:** Turn rework items into a short plan (scope = fixing issues, acceptance criteria = each critical item resolved, tasks for Code). Then **Code** (implement fixes) → **Review/Test** (backend-reviewer, frontend-reviewer only; E2E remains user-triggered) again. **project-manager runs this loop automatically:** when Review/Test reports critical issues, it creates the rework plan, spawns Code agents to fix, triggers Review/Test again, and repeats until there are no critical issues and gates pass—then declares code **production ready**.
+
+---
+
+## Cross-phase standards
+
+- **Consistency:** All phases respect `core-standards.md` and domain rules (`api-routes.md`, etc.).
+- **Traceability:** Link code and review back to the plan (e.g. "implements AC-1, AC-2" in commits or PR description).
+- **Single source of truth:** The plan doc is the contract; change it when scope or criteria change, then proceed.
+- **Smooth handoff:** Each phase ends with written artifacts the next phase needs; avoid "verbal" handoffs only.

@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import { getWorkflowSourceRoot } from "../workflowPaths";
 import {
   getWorkspaceManifest,
   getUserManifest,
@@ -50,8 +51,8 @@ export async function applyCursor(context: AdapterContext): Promise<ApplyResult>
     };
   }
 
-  const cursorSrc = path.join(extensionPath, ".cursor");
-  const pluginSrc = path.join(extensionPath, ".cursor-plugin");
+  const cursorSrc = getWorkflowSourceRoot(extensionPath, "cursor");
+  const pluginSrc = path.join(extensionPath, "workflow", "cursor-plugin");
   if (!fs.existsSync(cursorSrc) || !fs.existsSync(pluginSrc)) {
     return {
       success: false,

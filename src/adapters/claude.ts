@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import type { AdapterContext, ApplyResult, RemoveResult } from "./types";
+import { getWorkflowSourceRoot } from "../workflowPaths";
 import {
   getWorkspaceManifest,
   getUserManifest,
@@ -11,19 +12,20 @@ import {
   clearUserManifest,
 } from "../workflowManifest";
 
-function stripFrontmatter(content: string): string {
-  const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
-  return match ? match[1].trim() : content;
-}
+const SKIP_DIRS = new Set([".git", "node_modules", ".vscode-test"]);
 
-/** Recursively copy a directory (e.g. skills with SKILL.md and subdirs). */
+/** Recursively copy a directory, skipping SKIP_DIRS. */
 function copyDirRecursive(src: string, dest: string): void {
-  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+  if (!fs.existsSync(src)) return;
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
   const entries = fs.readdirSync(src, { withFileTypes: true });
   for (const e of entries) {
     const srcPath = path.join(src, e.name);
     const destPath = path.join(dest, e.name);
     if (e.isDirectory()) {
+      if (SKIP_DIRS.has(e.name)) continue;
       copyDirRecursive(srcPath, destPath);
     } else {
       fs.copyFileSync(srcPath, destPath);
@@ -31,32 +33,8 @@ function copyDirRecursive(src: string, dest: string): void {
   }
 }
 
-function buildClaudeMd(extensionPath: string): string {
-  const rulesDir = path.join(extensionPath, ".cursor", "rules");
-  if (!fs.existsSync(rulesDir)) return "# Project rules\n\nNo rules found.";
-  const entries = fs.readdirSync(rulesDir, { withFileTypes: true });
-  const parts: string[] = [
-    "# Plan-Code-Review workflow: rules and standards",
-    "",
-    "This file was generated from the Plan-Code-Review Workflow extension. Follow these rules and the compounding dev cycle (Plan → Code → Review/Test → Plan).",
-    "",
-  ];
-  for (const e of entries) {
-    if (!e.isFile() || (!e.name.endsWith(".mdc") && !e.name.endsWith(".md"))) continue;
-    if (e.name === "README.md") continue;
-    const filePath = path.join(rulesDir, e.name);
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const body = stripFrontmatter(raw);
-    parts.push(`## ${e.name.replace(/\.(mdc|md)$/, "").replace(/-/g, " ")}`);
-    parts.push("");
-    parts.push(body);
-    parts.push("");
-  }
-  return parts.join("\n");
-}
-
 /**
- * Apply workflow for Claude Code: .claude/agents, .claude/rules, .claude/skills, CLAUDE.md, optional hooks in .claude/settings.json.
+ * Apply workflow for Claude Code: copy from workflow/claude to .claude/ and CLAUDE.md.
  * When claudeInstallTarget is "user", writes to ~/.claude/ (all projects). Otherwise writes to project root.
  */
 export async function applyClaude(context: AdapterContext): Promise<ApplyResult> {
@@ -70,6 +48,15 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
     };
   }
 
+  const claudeSrc = getWorkflowSourceRoot(extensionPath, "claude");
+  if (!fs.existsSync(claudeSrc)) {
+    return {
+      success: false,
+      message:
+        "Extension workflow files not found. Ensure the extension was installed from a package that includes workflow/claude (e.g. Install from VSIX after building with `npm run compile && vsce package`).",
+    };
+  }
+
   const claudeDir = isUser
     ? path.join(os.homedir(), ".claude")
     : path.join(workspaceRootPath!, ".claude");
@@ -79,66 +66,27 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
 
   const details: string[] = [];
   try {
-    const agentsSrc = path.join(extensionPath, ".cursor", "agents");
-    const agentsDest = path.join(claudeDir, "agents");
-    const hooksSrc = path.join(extensionPath, ".cursor", "hooks");
-
-    if (!fs.existsSync(agentsSrc)) {
-      return {
-        success: false,
-        message:
-          "Extension workflow files not found. Ensure the extension was installed from a package that includes .cursor and .cursor-plugin (e.g. Install from VSIX after building with `npm run compile && vsce package`).",
-      };
-    }
-
     if (!fs.existsSync(claudeDir)) fs.mkdirSync(claudeDir, { recursive: true });
-    if (!fs.existsSync(agentsDest)) fs.mkdirSync(agentsDest, { recursive: true });
 
-    // Copy agents (.md only)
-    const agentFiles = fs.readdirSync(agentsSrc);
-    for (const f of agentFiles) {
-      if (!f.endsWith(".md")) continue;
-      fs.copyFileSync(path.join(agentsSrc, f), path.join(agentsDest, f));
+    const agentsSrc = path.join(claudeSrc, "agents");
+    const rulesSrc = path.join(claudeSrc, "rules");
+    const skillsSrc = path.join(claudeSrc, "skills");
+    const hooksSrc = path.join(claudeSrc, "hooks");
+
+    if (fs.existsSync(agentsSrc)) {
+      copyDirRecursive(agentsSrc, path.join(claudeDir, "agents"));
+      details.push(".claude/agents/ (agent definitions)");
     }
-    details.push(".claude/agents/ (agent definitions)");
-
-    // Copy rules (.mdc and .md) so Claude Code loads them from .claude/rules/ (includes compounding dev cycle)
-    const rulesSrc = path.join(extensionPath, ".cursor", "rules");
-    const rulesDest = path.join(claudeDir, "rules");
     if (fs.existsSync(rulesSrc)) {
-      if (!fs.existsSync(rulesDest)) fs.mkdirSync(rulesDest, { recursive: true });
-      const ruleEntries = fs.readdirSync(rulesSrc, { withFileTypes: true });
-      for (const e of ruleEntries) {
-        if (!e.isFile()) continue;
-        if (!e.name.endsWith(".mdc") && !e.name.endsWith(".md")) continue;
-        if (e.name === "README.md") continue;
-        fs.copyFileSync(path.join(rulesSrc, e.name), path.join(rulesDest, e.name));
-      }
+      copyDirRecursive(rulesSrc, path.join(claudeDir, "rules"));
       details.push(".claude/rules/ (compounding dev cycle, core standards, etc.)");
     }
-
-    // Copy skills (full tree: skill-name/SKILL.md and supporting files)
-    const skillsSrc = path.join(extensionPath, ".cursor", "skills");
-    const skillsDest = path.join(claudeDir, "skills");
     if (fs.existsSync(skillsSrc)) {
-      copyDirRecursive(skillsSrc, skillsDest);
+      copyDirRecursive(skillsSrc, path.join(claudeDir, "skills"));
       details.push(".claude/skills/ (skills with SKILL.md)");
     }
-
-    fs.writeFileSync(claudeMdPath, buildClaudeMd(extensionPath), "utf-8");
-    details.push(
-      isUser ? "CLAUDE.md in ~/.claude/ (project rules)" : "CLAUDE.md (project rules)"
-    );
-
-    // Optional: copy hook scripts and add hooks to settings
-    const hooksDest = path.join(claudeDir, "hooks");
     if (fs.existsSync(hooksSrc)) {
-      if (!fs.existsSync(hooksDest)) fs.mkdirSync(hooksDest, { recursive: true });
-      for (const f of fs.readdirSync(hooksSrc)) {
-        if (f.endsWith(".sh")) {
-          fs.copyFileSync(path.join(hooksSrc, f), path.join(hooksDest, f));
-        }
-      }
+      copyDirRecursive(hooksSrc, path.join(claudeDir, "hooks"));
       details.push(".claude/hooks/ (session-init, format, audit scripts)");
 
       const settingsPath = path.join(claudeDir, "settings.json");
@@ -146,11 +94,14 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
       if (fs.existsSync(settingsPath)) {
         try {
           settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
-        } catch {
-          // keep empty
+        } catch (err) {
+          console.warn(
+            "Claude adapter: could not parse existing settings.json, using empty object",
+            err instanceof Error ? err.message : String(err)
+          );
         }
       }
-      if (!settings.hooks) {
+      if (!(settings as { hooks?: unknown }).hooks) {
         if (!settings["$schema"]) {
           settings["$schema"] = "https://json.schemastore.org/claude-code-settings.json";
         }
@@ -173,6 +124,14 @@ export async function applyClaude(context: AdapterContext): Promise<ApplyResult>
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
         details.push(".claude/settings.json (SessionStart hook added)");
       }
+    }
+
+    const claudeMdSrc = path.join(claudeSrc, "CLAUDE.md");
+    if (fs.existsSync(claudeMdSrc)) {
+      fs.copyFileSync(claudeMdSrc, claudeMdPath);
+      details.push(
+        isUser ? "CLAUDE.md in ~/.claude/ (project rules)" : "CLAUDE.md (project rules)"
+      );
     }
 
     if (isUser) {

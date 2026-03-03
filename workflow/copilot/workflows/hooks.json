@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": ".github/workflows/format.sh",
+        "timeout": 10
+      }
+    ],
+    "afterShellExecution": [
+      {
+        "command": ".github/workflows/audit.sh",
+        "timeout": 5
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".github/workflows/audit.sh",
+        "timeout": 5
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": ".github/workflows/audit.sh",
+        "timeout": 5
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": ".github/workflows/session-init.sh",
+        "timeout": 5
+      }
+    ],
+    "stop": [
+      {
+        "command": ".github/workflows/audit.sh",
+        "timeout": 5
+      }
+    ]
+  }
+}

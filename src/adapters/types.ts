@@ -4,7 +4,7 @@
 export type AIAssistant = "cursor" | "claude" | "copilot" | "codex";
 
 export interface AdapterContext {
-  /** Extension root path (where .cursor and .cursor-plugin live). */
+  /** Extension root path (workflow sources under workflow/<assistant>/ and workflow/cursor-plugin/). */
   extensionPath: string;
   /** Workspace root path, or undefined if no folder open. */
   workspaceRootPath: string | undefined;

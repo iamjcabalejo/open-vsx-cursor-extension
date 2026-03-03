@@ -161,11 +161,11 @@ export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexS
 }
 
 /**
- * Remove from ~/.codex/skills only the skill folders that exist in the extension's .cursor/skills.
+ * Remove from ~/.codex/skills only the skill folders that exist in the extension's workflow/codex/skills.
  * Does not remove other skills the user may have added.
  */
 export function removeCodexSkillsFromExtension(extensionPath: string): InstallCodexSkillsResult {
-  const skillsSrcDir = path.join(extensionPath, ".cursor", "skills");
+  const skillsSrcDir = path.join(extensionPath, "workflow", "codex", "skills");
   if (!fs.existsSync(skillsSrcDir)) {
     return {
       success: true,
@@ -222,7 +222,7 @@ export function removeCodexSkillsFromExtension(extensionPath: string): InstallCo
 
 /**
  * Install skills to ~/.codex/skills.
- * - If extensionPath is provided: sync from extensionPath/.cursor/skills (one-step, no .agents/skills).
+ * - If extensionPath is provided: sync from extensionPath/workflow/codex/skills.
  * - Otherwise: sync from workspaceRootPath/.agents/skills (legacy; run "Apply workflow for Codex" to sync from extension).
  * Each subfolder must contain SKILL.md; others are skipped.
  */
@@ -231,7 +231,7 @@ export function installCodexSkills(
   extensionPath?: string
 ): InstallCodexSkillsResult {
   const skillsSrc = extensionPath
-    ? path.join(extensionPath, ".cursor", "skills")
+    ? path.join(extensionPath, "workflow", "codex", "skills")
     : workspaceRootPath
       ? path.join(workspaceRootPath, ".agents", "skills")
       : undefined;

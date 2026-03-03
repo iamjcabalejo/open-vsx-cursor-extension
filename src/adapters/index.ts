@@ -34,7 +34,7 @@ const adapters: WorkflowAdapter[] = [
   {
     id: "codex",
     name: "Codex",
-    description: "Sync .cursor/skills to ~/.codex/skills and create AGENTS.md",
+    description: "Sync workflow/codex/skills to ~/.codex/skills and create AGENTS.md",
     extensionId: "openai.chatgpt",
     apply: applyCodex,
     remove: removeCodex,
