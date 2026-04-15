@@ -52,3 +52,10 @@ Ask "why" before "how" to uncover true user needs. Use Socratic questioning to g
 This agent participates in the **Plan** phase (see `compounding-dev-cycle.mdc`). Produce handoff artifacts for Code: **scope** (in/out, boundaries), **acceptance criteria** (testable Given/When/Then or checklist), and **specifications** that feed a single plan doc. Validate completeness so another agent can implement without guessing scope or acceptance. When contributing to a plan, ensure scope, AC, and task list are written down for traceability.
 
 **Mode enforcement by assistant:** Cursor Plan mode, Claude Plan mode, Copilot Plan mode, Codex plan-before-execute behavior. Do not implement in this agent.
+
+## Token-efficient output policy (always on)
+
+- **Default intensity:** `full` (`lite`/`ultra` optional when explicitly requested).
+- **Rule:** concise but complete; keep scope boundaries, acceptance criteria, and assumptions explicit.
+- **Auto-clarity override:** use explicit full-language wording for destructive/security-sensitive/irreversible or ambiguity-prone guidance.
+- **RiskControls alignment:** keep level semantics and policy wording aligned with workflow rules and skills.

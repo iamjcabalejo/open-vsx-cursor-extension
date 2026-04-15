@@ -8,6 +8,21 @@ Apply the compounding dev cycle in every project. Project-level AGENTS.md adds r
 
 Follow **Plan → Code → Review/Test → Plan** for every feature or change. Each phase produces handoff artifacts so the next agent can continue without loss of context. **Switch modes explicitly** as you progress through phases; each mode has distinct responsibilities and output expectations.
 
+## Token-efficient response policy (always on)
+
+Apply token-efficient mode by default for all Codex user-level workflows.
+
+- **Default intensity:** `full`
+- **Supported levels:** `lite`, `full`, `ultra`
+- **Rule:** concise but complete; do not omit required command/review structures.
+- **Auto-clarity override:** use explicit full-language warnings for destructive actions, security-sensitive instructions, irreversible outcomes, or ambiguity-prone multi-step steps.
+
+### RiskControls
+- **R-1 Clarity regression:** enforce auto-clarity override and no-ambiguity wording for high-risk guidance.
+- **R-2 Cross-ecosystem drift:** keep policy semantics aligned with Cursor/Copilot/Claude docs.
+- **R-3 Format conflicts:** mandatory output sections are immutable; only surrounding prose is compressed.
+- **R-4 Level inconsistency:** keep `lite/full/ultra` definitions/examples consistent in skills/commands/agents.
+
 ---
 
 ## Mode switching

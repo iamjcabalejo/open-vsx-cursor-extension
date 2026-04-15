@@ -9,6 +9,15 @@ description: Break features into implementation tasks for backend, frontend, and
 
 When this skill is used (including by the **feature-plan** command), work MUST be done in **Plan mode**. No implementation: no application code, no file creation except the plan artifact at `docs/plans/<feature-slug>.md`. Planning agents may inform scope and tasks; they are not spawned for Code or Review. If asked to implement, decline and direct to run **project-manager** with the plan.
 
+## Token-efficient response policy (always on)
+
+Apply token-efficient mode when producing plan content.
+
+- **Default intensity:** `full` (`lite`/`ultra` optional when explicitly requested).
+- **Rule:** concise but complete; do not omit required plan sections, AC numbering, or file-path specificity.
+- **Auto-clarity override:** use explicit full-language wording for destructive/security-sensitive/irreversible guidance and ambiguity-prone multi-step instructions.
+- **No ambiguous compression:** keep scope boundaries, risks, mitigations, and pass/fail criteria explicit.
+
 ## Clarification-first behavior (required)
 
 Planning must be interactive when details are missing. Before finalizing the plan, ask relevant clarifying questions about:
@@ -50,6 +59,7 @@ Plans produced by **feature-plan** must include these sections so **project-mana
 - [ ] File changes (new/modified) specified
 - [ ] API contract or schema described
 - [ ] Success criteria clear
+- [ ] RiskControls map critical risks to control + validation + pass condition
 
 ## Detail level (for project-manager handoff)
 

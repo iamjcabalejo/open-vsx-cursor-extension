@@ -2,7 +2,7 @@
   "name": "plan-code-review-workflow",
   "displayName": "Plan-Code-Review Workflow",
   "description": "Apply the Plan → Code → Review cycle to Cursor, Claude Code, GitHub Copilot, or Codex. One workflow, automatic code review, production-ready features.",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {
@@ -16,15 +16,21 @@
   "categories": ["Other", "Snippets", "Formatters"],
   "keywords": [
     "productivity",
-    "nextjs",
-    "supabase",
-    "typescript",
-    "react",
-    "api",
-    "development",
-    "mcp",
+    "workflow",
+    "ai-workflow",
+    "plan-code-review",
+    "code-review",
+    "agents",
+    "skills",
     "cursor",
-    "agents"
+    "claude-code",
+    "github-copilot",
+    "codex",
+    "prompt-engineering",
+    "developer-tools",
+    "automation",
+    "typescript",
+    "mcp"
   ],
   "main": "./out/extension.js",
   "activationEvents": [

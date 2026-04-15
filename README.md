@@ -48,6 +48,21 @@ AI can write code fast—but without a clear plan and review loop, you get scope
 
 ---
 
+## Token-efficient outputs (new in 5.1.0)
+
+The workflow now includes an always-on token-efficiency policy across Cursor, Claude Code, GitHub Copilot, and Codex workflow docs.
+
+- **Default behavior:** concise but complete responses.
+- **Levels:** `lite`, `full` (default), `ultra`.
+- **Safety override:** high-risk/destructive/security-sensitive instructions switch to explicit full-language warnings before returning to compact mode.
+- **Risk controls included:** clarity regression, cross-assistant drift, output-format conflicts, and level inconsistency.
+
+This keeps responses shorter without weakening safety, required structure, or technical accuracy.
+
+**Credit:** Token-efficiency style is inspired by the Caveman skill by Julius Brussee: [Caveman SKILL.md](https://github.com/JuliusBrussee/caveman/blob/main/.cursor/skills/caveman/SKILL.md).
+
+---
+
 ## Install the extension
 
 - **VS Code:** [VS Code Marketplace](https://marketplace.visualstudio.com/) or [Open VSX](https://open-vsx.org/) — search for **Plan-Code-Review Workflow**.
@@ -85,7 +100,7 @@ The extension keeps a manifest of what it applied (workspace and user). Remove u
 
 **Codex:** Codex has no separate rules folder; it uses only the **AGENTS.md instruction chain** (global `~/.codex/AGENTS.md` and workspace `AGENTS.md`). To use an alternate filename (e.g. `RULES.md`), add it to `project_doc_fallback_filenames` in `~/.codex/config.toml` (see [Codex customization](https://developers.openai.com/codex/guides/agents-md)).
 
-**Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. "Follow CLAUDE.md", "Use the code-review skill"). **Others:** Reference the generated files in chat (e.g. “Follow CLAUDE.md”, “Use the code-review skill”).
+**Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. “Follow `CLAUDE.md`”, “Use the `code-review` skill”).
 
 ## What’s inside
 
@@ -123,4 +138,4 @@ After changing any tree, rebuild and repackage the extension so the next Apply u
 
 ## License & author
 
-MIT — use freely.
+Licensed under MIT. See [`LICENSE`](LICENSE).

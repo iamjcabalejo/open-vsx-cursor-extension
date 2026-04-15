@@ -9,6 +9,43 @@ Follow **Plan → Code → Review/Test → Plan** for every feature or change. E
 
 ---
 
+## TokenPolicy (always on)
+
+Use token-efficient communication in every phase and output unless an auto-clarity override applies.
+
+### Defaults
+- **Activation:** Always on for all skills, commands, and agents that inherit this rule.
+- **Baseline behavior:** concise but complete; preserve required sections, safety notes, and acceptance criteria.
+- **Canonical terms:** `token-efficient mode`, `intensity level`, `auto-clarity override`.
+
+### Intensity levels
+- **lite:** Full sentences, minimal filler, compact wording.
+- **full (default):** Aggressively concise phrasing; remove non-essential prose while keeping all technical meaning.
+- **ultra:** Maximum compression for low-risk contexts; short fragments allowed, but required structure must remain intact.
+
+### Auto-clarity override (required)
+Temporarily switch to explicit, uncompressed language for:
+- destructive or irreversible actions
+- security warnings and sensitive operations
+- multi-step instructions where compression could cause mistakes
+- legal/compliance or data-integrity warnings
+
+After the clear warning/instruction, return to the selected intensity level.
+
+### No ambiguous compression guardrail
+Never compress away:
+- preconditions required for safe execution
+- explicit warnings about irreversible outcomes
+- required checklist items in plan/review outputs
+
+### RiskControls
+- **R-1 Clarity regression:** Use auto-clarity override + forbidden ambiguity guardrail.
+- **R-2 Policy drift:** Keep a canonical TokenPolicy block aligned across Cursor/Copilot/Claude docs.
+- **R-3 Format conflicts:** Preserve mandatory output schemas first, then compress wording.
+- **R-4 Level inconsistency:** Keep shared level definitions (`lite/full/ultra`) and examples aligned in skills/agents/commands.
+
+---
+
 ## Mode switching
 
 Each mode has distinct responsibilities and output expectations.

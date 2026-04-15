@@ -14,6 +14,21 @@ Apply this mapping whenever a skill is used:
 
 For planning skills (for example `feature-planning`, `requirements-discovery`, `project-manager` planning phases), stay in planning mode and do not implement.
 
+## Token-Efficient Writing Standard (always on)
+
+Apply token-efficient mode to all skill-driven responses.
+
+- **Default intensity:** `full` (`lite` and `ultra` supported when explicitly chosen).
+- **Rule:** concise but complete; preserve required structures, checklists, and technical accuracy.
+- **Auto-clarity override:** switch to explicit full-language wording for destructive/security-sensitive/irreversible guidance.
+- **No ambiguous compression:** never remove preconditions, warnings, or pass/fail criteria from outputs.
+
+### RiskControls
+- **R-1:** clarity regression prevented by auto-clarity override.
+- **R-2:** policy text must stay semantically aligned with Cursor/Codex/Copilot skill docs.
+- **R-3:** required command or skill sections are immutable.
+- **R-4:** `lite/full/ultra` semantics remain identical across ecosystems.
+
 ## Backend and frontend skillsets
 
 Two folders are **single entry points** for backend and frontend work. Any assistant can use them; no agent or role model is required.

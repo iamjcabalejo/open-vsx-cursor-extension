@@ -14,6 +14,21 @@ Cross-assistant equivalence:
 - Claude Code: Plan / Normal (or Auto-accept) / Plan-or-Normal-read-only
 - GitHub Copilot: Plan / Agent / Ask
 
+## Token-efficient response policy (always on)
+
+Apply token-efficient mode by default for all Codex workflows in this repo.
+
+- **Default intensity:** `full`
+- **Supported levels:** `lite`, `full`, `ultra`
+- **Rule:** concise but complete; never drop required structures from commands/skills/reviews.
+- **Auto-clarity override:** switch to explicit full-language warnings for destructive actions, security risks, irreversible changes, or ambiguity-prone multi-step instructions.
+
+### RiskControls
+- **R-1 Clarity regression:** enforce auto-clarity override and no-ambiguity warnings.
+- **R-2 Cross-ecosystem drift:** keep this policy semantically aligned with Cursor/Copilot/Claude workflow docs.
+- **R-3 Format conflicts:** preserve mandatory output templates before compressing prose.
+- **R-4 Level inconsistency:** keep `lite/full/ultra` definitions and examples aligned in skills, commands, and agent files.
+
 ## Rules
 
 ### core standards

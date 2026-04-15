@@ -7,6 +7,16 @@ model: claude-sonnet-4-5
 
 Run this command in **Plan mode** only. This command is planning-only: do not implement code, do not run build/test commands, and do not modify application files. If the user asks to implement, direct them to run **feature-plan** (for a plan file) and then **project-manager** (for Code → Review/Test).
 
+## Token-efficient response policy (always on)
+
+Use token-efficient mode for all task-analysis output.
+
+- **Default intensity:** `full`
+- **Allowed levels:** `lite`, `full`, `ultra`
+- **Rule:** concise but complete; preserve all required analysis sections.
+- **Auto-clarity override:** use explicit full-language wording for risky/destructive/security-sensitive instructions and ambiguous multi-step guidance.
+- **No ambiguous compression:** do not compress away scope limits, implementation risks, or success criteria.
+
 **Scope of this command:** This command produces a **task breakdown and implementation plan** only. It does **not** write to `docs/plans/` and does **not** run the full Plan → Code → Review cycle. For the full compounding cycle (plan file → delegation → code review → loop until production ready), use **feature-plan** to create a plan at `docs/plans/<feature-slug>.md`, then run **project-manager** with that plan path.
 
 Analyze the following task and create a clear, actionable implementation plan.
@@ -104,6 +114,7 @@ npm install package-name
 ### Potential Issues
 - Issue 1 and mitigation
 - Issue 2 and mitigation
+- Add owner + validation evidence for each critical issue.
 
 ### Next Steps
 1. Start with Phase 1, Step 1

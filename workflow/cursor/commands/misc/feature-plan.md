@@ -9,6 +9,16 @@ model: claude-sonnet-4-5
 
 You MUST run this command in **Plan mode**. Do not implement code, create application files, or run build/test commands. Your only allowed output is the plan document (and writing it to `docs/plans/<feature-slug>.md`). If the user or context asks you to "also implement" or "start coding," decline and remind them: feature-plan is planning only; use project-manager with this plan to run Code ? Review/Test.
 
+## Token-efficient response policy (always on)
+
+Use token-efficient mode for all plan-writing output in this command.
+
+- **Default intensity:** `full`
+- **Allowed levels:** `lite`, `full`, `ultra`
+- **Rule:** concise but complete; never remove required plan sections or acceptance-criteria traceability.
+- **Auto-clarity override:** use explicit full-language wording for destructive/irreversible/security-sensitive warnings and ambiguity-prone instructions.
+- **No ambiguous compression:** do not compress away scope boundaries, required checklists, file paths, or pass/fail conditions.
+
 ## Clarification-first planning (interactive)
 
 Before writing the final plan, ask relevant clarifying questions when any requirement is ambiguous or missing. Focus on business goal, in-scope vs out-of-scope, target users, constraints, dependencies, integration points, edge cases, non-functional requirements (security/performance), and acceptance criteria. Do not invent missing details.
@@ -127,6 +137,7 @@ Produce a **detailed** plan so project-manager and implementers can work without
 ### Risks / potential issues (recommended)
 - 2?5 bullets: unknown dependencies, migration risks, breaking changes, third-party limits, performance considerations
 - For each: brief mitigation or "TBD"
+- Include a **RiskControls** subsection mapping each risk to: control, validation, and pass condition (no open TBDs for critical risks).
 
 ### Next steps (recommended)
 - 1. Run project-manager with this plan
