@@ -2,6 +2,18 @@
 
 Follow the compounding dev cycle and apply these rules and agent roles.
 
+## Mode mapping (Codex + cross-assistant)
+
+Use Codex behavior explicitly by phase:
+- **Plan/discovery:** plan-before-execute behavior (planning only; no implementation).
+- **Implementation:** agent execution behavior (code changes and tests).
+- **Review/explanation:** read-only review behavior (no edits unless explicitly requested).
+
+Cross-assistant equivalence:
+- Cursor: Plan / Agent / Ask
+- Claude Code: Plan / Normal (or Auto-accept) / Plan-or-Normal-read-only
+- GitHub Copilot: Plan / Agent / Ask
+
 ## Rules
 
 ### core standards

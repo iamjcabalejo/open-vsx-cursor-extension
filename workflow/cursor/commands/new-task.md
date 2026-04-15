@@ -3,9 +3,17 @@ description: Analyze task complexity and create actionable implementation plan
 model: claude-sonnet-4-5
 ---
 
+## Cursor mode: Plan mode only (strict)
+
+Run this command in **Plan mode** only. This command is planning-only: do not implement code, do not run build/test commands, and do not modify application files. If the user asks to implement, direct them to run **feature-plan** (for a plan file) and then **project-manager** (for Code → Review/Test).
+
 **Scope of this command:** This command produces a **task breakdown and implementation plan** only. It does **not** write to `docs/plans/` and does **not** run the full Plan → Code → Review cycle. For the full compounding cycle (plan file → delegation → code review → loop until production ready), use **feature-plan** to create a plan at `docs/plans/<feature-slug>.md`, then run **project-manager** with that plan path.
 
 Analyze the following task and create a clear, actionable implementation plan.
+
+## Clarification-first planning (interactive)
+
+If the task description is incomplete or ambiguous, ask relevant follow-up questions before producing the final plan. Prioritize questions about goals, scope boundaries, target users, constraints, integrations, dependencies, edge cases, and acceptance criteria. Do not assume missing requirements without stating them.
 
 ## Task
 

@@ -16,6 +16,7 @@ Each mode has distinct responsibilities and output expectations.
 
 - **Entry:** When receiving a user request without clear scope or acceptance criteria.
 - **Behavior:** Ask clarifying questions; gather requirements; validate assumptions.
+- **Interactive clarification requirement:** Ask focused follow-up questions before plan authoring whenever scope, constraints, priorities, target users, dependencies, environments, or acceptance criteria are unclear. Do not guess missing requirements.
 - **Output:** Structured requirements (may be informal notes or structured as RFC/issue).
 - **Exit:** When scope, constraints, and success criteria are unambiguous.
 
@@ -66,6 +67,8 @@ Each mode has distinct responsibilities and output expectations.
 **Goal:** Unambiguous scope, acceptance criteria, and technical approach before implementation.
 
 **Modes:** When scope is unclear, run **ASK** (Plan discovery) first; then **PLAN** (Plan authoring). When the user request already has clear scope and AC, go directly to **PLAN**.
+
+**Interactive planning guidance:** Even when starting directly in PLAN, ask targeted clarifying questions if any critical detail is ambiguous (business goal, boundaries, edge cases, integrations, non-functional requirements, or success criteria) before finalizing the plan artifact.
 
 **Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
 

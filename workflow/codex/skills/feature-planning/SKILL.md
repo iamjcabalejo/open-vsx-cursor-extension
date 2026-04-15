@@ -9,6 +9,18 @@ description: Break features into implementation tasks for backend, frontend, and
 
 When this skill is used (including by the **feature-plan** command), work MUST be done in **Plan mode**. No implementation: no application code, no file creation except the plan artifact at `docs/plans/<feature-slug>.md`. Planning agents may inform scope and tasks; they are not spawned for Code or Review. If asked to implement, decline and direct to run **project-manager** with the plan.
 
+## Clarification-first behavior (required)
+
+Planning must be interactive when details are missing. Before finalizing the plan, ask relevant clarifying questions about:
+- business objective and success outcome
+- in-scope vs out-of-scope boundaries
+- user roles and primary flows
+- constraints, integrations, dependencies, and environments
+- edge cases and non-functional requirements (security, performance)
+- acceptance criteria and definition of done
+
+Do not infer critical requirements silently. If the user asks to proceed without all answers, explicitly document assumptions in the plan.
+
 ## Rules to follow
 
 - **Compounding cycle:** Follow the **Plan** phase in `AGENTS.md compounding-dev-cycle.mdc`: goal = unambiguous scope, acceptance criteria, technical approach; artifact = single plan doc; handoff rule = plan complete when another agent can implement without guessing.

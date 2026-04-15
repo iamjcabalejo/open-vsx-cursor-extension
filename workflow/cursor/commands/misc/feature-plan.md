@@ -9,6 +9,15 @@ model: claude-sonnet-4-5
 
 You MUST run this command in **Plan mode**. Do not implement code, create application files, or run build/test commands. Your only allowed output is the plan document (and writing it to `docs/plans/<feature-slug>.md`). If the user or context asks you to "also implement" or "start coding," decline and remind them: feature-plan is planning only; use project-manager with this plan to run Code ? Review/Test.
 
+## Clarification-first planning (interactive)
+
+Before writing the final plan, ask relevant clarifying questions when any requirement is ambiguous or missing. Focus on business goal, in-scope vs out-of-scope, target users, constraints, dependencies, integration points, edge cases, non-functional requirements (security/performance), and acceptance criteria. Do not invent missing details.
+
+If details are unclear:
+1. Ask concise, high-impact follow-up questions.
+2. Wait for answers (or explicitly mark assumptions if the user asks to proceed without answers).
+3. Reflect the resolved clarifications in the final plan.
+
 ## Rules to follow
 
 - **Compounding cycle:** Follow the **Plan** phase in `.cursor/rules/compounding-dev-cycle.mdc` (scope, acceptance criteria, technical approach, task list; handoff rule: plan complete when another agent can implement without guessing).

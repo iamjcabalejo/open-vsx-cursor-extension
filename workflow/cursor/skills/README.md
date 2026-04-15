@@ -2,6 +2,18 @@
 
 Skills in `.cursor/skills/` provide reusable workflows and checklists for backend, frontend, and other domains. Use them with any AI assistant (e.g. Cursor, Codex, GitHub Copilot, Claude); they apply when the task matches the skill’s context.
 
+## Mode mapping by assistant
+
+Apply this mapping whenever a skill is used:
+
+| Intent | Cursor | Claude Code | GitHub Copilot | Codex |
+|--------|--------|-------------|----------------|-------|
+| Planning / discovery | Plan mode | Plan mode | Plan mode | Plan-before-execute behavior (planning only) |
+| Implementation | Agent mode | Normal or Auto-accept | Agent mode | Agent execution mode |
+| Review / explanation (read-only) | Ask mode | Plan mode or Normal with no edits | Ask mode | Read-only review behavior |
+
+For planning skills (for example `feature-planning`, `requirements-discovery`, `project-manager` planning phases), stay in planning mode and do not implement.
+
 ## Backend and frontend skillsets
 
 Two folders are **single entry points** for backend and frontend work. Any assistant can use them; no agent or role model is required.

@@ -4,6 +4,18 @@
 
 **Full cycle:** See **`.github/instructions/compounding-dev-cycle.instructions.md`** (path-specific instructions with `applyTo: "**"`; Copilot uses it together with this file and `.github/copilot-instructions.md`).
 
+## Mode mapping (Copilot + cross-assistant)
+
+Use Copilot modes explicitly by phase:
+- **Plan/discovery:** Copilot **Plan mode** only (no implementation).
+- **Implementation:** Copilot **Agent mode**.
+- **Review/explanation:** Copilot **Ask mode** (read-only).
+
+Cross-assistant equivalence:
+- Cursor: Plan / Agent / Ask
+- Claude Code: Plan / Normal (or Auto-accept) / Plan-or-Normal-read-only
+- Codex: plan-before-execute / agent execution / read-only review behavior
+
 ---
 
 ## Custom agents (GitHub Copilot)

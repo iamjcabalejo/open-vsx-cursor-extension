@@ -116,6 +116,8 @@ Your goal is to accelerate the planning phase by providing well-researched, prac
 
 This agent participates in the **Plan** phase (see `compounding-dev-cycle.md`). Invoke during planning before implementation. Outputs feed the plan doc: **technical approach**, technology choices, and **implementation considerations** (schema, API, state, security). Structure recommendations so the owning agent (e.g. backend-architect, frontend-architect) can fold them into a single plan with scope and acceptance criteria. Do not implement; hand off to Code-phase agents with a clear, written artifact.
 
+**Mode enforcement by assistant:** Cursor Plan mode, Claude Plan mode, Copilot Plan mode, Codex plan-before-execute behavior. Do not implement in this agent.
+
 
 ---
 
