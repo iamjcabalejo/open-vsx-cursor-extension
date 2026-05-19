@@ -35,7 +35,7 @@ function copyDirRecursive(srcDir: string, destDir: string): void {
 
 /**
  * Apply workflow for Codex.
- * - **project:** workspace `AGENTS.md` only (current project).
+ * - **project:** workspace `AGENTS.md` and `.codex/` (rules + skills) in this project only.
  * - **user:** `~/.codex/AGENTS.md`, `~/.codex/rules/`, and `~/.codex/skills/` (all projects).
  */
 export async function applyCodex(
@@ -124,6 +124,45 @@ export async function applyCodex(
       };
     }
 
+    const codexProjectDir = path.join(workspaceRootPath!, ".codex");
+    if (!fs.existsSync(codexProjectDir)) {
+      fs.mkdirSync(codexProjectDir, { recursive: true });
+    }
+
+    const rulesSrc = path.join(codexSrc, "rules");
+    if (fs.existsSync(rulesSrc)) {
+      copyDirRecursive(rulesSrc, path.join(codexProjectDir, "rules"));
+      details.push(
+        ".codex/rules/ (token-policy.md, compounding-dev-cycle, etc.)",
+      );
+    }
+
+    const projectSkillsRoot = path.join(codexProjectDir, "skills");
+    const syncResult = syncSkillsToCodexFromSource(
+      skillsSrc,
+      projectSkillsRoot,
+    );
+    if (!syncResult.success) {
+      return {
+        success: false,
+        message: syncResult.message,
+        details: syncResult.details,
+      };
+    }
+    details.push(".codex/skills/ (synced from workflow/codex/skills)");
+    const installedNames = syncResult.installed ?? [];
+    if (installedNames.length > 0) {
+      details.push(`Added ${installedNames.length} skill(s):`);
+      for (const name of installedNames) {
+        details.push(`  - ${name}`);
+      }
+    }
+    if ((syncResult.skipped?.length ?? 0) > 0) {
+      details.push(
+        "Skipped (no SKILL.md): " + (syncResult.skipped ?? []).join(", "),
+      );
+    }
+
     const workspaceAgentsSrc = path.join(codexSrc, "AGENTS.md");
     const agentsMdPath = path.join(workspaceRootPath!, "AGENTS.md");
     if (fs.existsSync(workspaceAgentsSrc)) {
@@ -132,12 +171,18 @@ export async function applyCodex(
     }
 
     recordWorkspaceApplied(workspaceRootPath!, {
-      codex: { workspaceAgents: true, appliedAt: new Date().toISOString() },
+      codex: {
+        workspaceAgents: true,
+        projectCodexDir: true,
+        skills: syncResult.installed ?? [],
+        appliedAt: new Date().toISOString(),
+      },
     });
 
     return {
       success: true,
-      message: "Codex workflow applied to this workspace (AGENTS.md).",
+      message:
+        "Codex workflow applied to this workspace (.codex/ and AGENTS.md).",
       details,
     };
   } catch (err) {
@@ -164,10 +209,11 @@ export async function removeCodex(
   const workspaceManifest = getWorkspaceManifest(workspaceRootPath);
   const userManifest = getUserManifest();
 
-  const skillsToRemove = userManifest?.codex?.skills;
   let skillsRemovedCount = 0;
-  if (skillsToRemove?.length) {
-    const skillsResult = removeCodexSkillsByNames(skillsToRemove);
+
+  const userSkillsToRemove = userManifest?.codex?.skills;
+  if (userSkillsToRemove?.length) {
+    const skillsResult = removeCodexSkillsByNames(userSkillsToRemove);
     if (!skillsResult.success) {
       return {
         success: false,
@@ -177,7 +223,7 @@ export async function removeCodex(
     }
     const skillDetails = skillsResult.details ?? [];
     if (skillDetails.length) details.push(...skillDetails);
-    skillsRemovedCount = skillsResult.installed?.length ?? 0;
+    skillsRemovedCount += skillsResult.installed?.length ?? 0;
   }
 
   if (userManifest?.codex?.userAgents) {
@@ -214,6 +260,59 @@ export async function removeCodex(
   }
 
   if (workspaceRootPath && workspaceManifest?.codex) {
+    const workspaceCodex = workspaceManifest.codex;
+    const projectSkillsRoot = path.join(workspaceRootPath, ".codex", "skills");
+
+    if (workspaceCodex.skills?.length) {
+      const skillsResult = removeCodexSkillsByNames(
+        workspaceCodex.skills,
+        projectSkillsRoot,
+      );
+      if (!skillsResult.success) {
+        return {
+          success: false,
+          message: skillsResult.message,
+          details: skillsResult.details,
+        };
+      }
+      const skillDetails = skillsResult.details ?? [];
+      if (skillDetails.length) details.push(...skillDetails);
+      skillsRemovedCount += skillsResult.installed?.length ?? 0;
+    }
+
+    if (workspaceCodex.projectCodexDir) {
+      const rulesDir = path.join(workspaceRootPath, ".codex", "rules");
+      const tokenPolicyPath = path.join(rulesDir, "token-policy.md");
+      if (fs.existsSync(tokenPolicyPath)) {
+        try {
+          const ruleContent = fs.readFileSync(tokenPolicyPath, "utf-8");
+          if (ruleContent.includes("# TokenPolicy")) {
+            fs.rmSync(rulesDir, { recursive: true });
+            details.push("Removed .codex/rules/");
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          errors.push(`${rulesDir}: ${message}`);
+        }
+      }
+      const skillsDir = path.join(workspaceRootPath, ".codex", "skills");
+      try {
+        if (
+          fs.existsSync(skillsDir) &&
+          fs.readdirSync(skillsDir).length === 0
+        ) {
+          fs.rmdirSync(skillsDir);
+        }
+        const codexDir = path.join(workspaceRootPath, ".codex");
+        if (fs.existsSync(codexDir) && fs.readdirSync(codexDir).length === 0) {
+          fs.rmdirSync(codexDir);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`${path.join(workspaceRootPath, ".codex")}: ${message}`);
+      }
+    }
+
     const agentsPath = path.join(workspaceRootPath, "AGENTS.md");
     if (fs.existsSync(agentsPath)) {
       try {

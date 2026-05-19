@@ -90,8 +90,8 @@ export function activate(context: vscode.ExtensionContext): void {
       [
         {
           label: "Project root",
-          description: "AGENTS.md in this workspace",
-          detail: "Apply to the current project only",
+          description: ".codex/ and AGENTS.md in this workspace",
+          detail: "Rules and skills stay in this project only (not ~/.codex)",
           target: "project" as const,
         },
         {

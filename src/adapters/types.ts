@@ -12,7 +12,7 @@ export interface AdapterContext {
   claudeInstallTarget?: "project" | "user";
   /** When applying Cursor workflow: install in project (.cursor) or user dir (~/.cursor). */
   cursorInstallTarget?: "project" | "user";
-  /** When applying Codex workflow: install in project (AGENTS.md) or user dir (~/.codex). */
+  /** When applying Codex workflow: install in project (.codex/ + AGENTS.md) or user dir (~/.codex). */
   codexInstallTarget?: "project" | "user";
 }
 

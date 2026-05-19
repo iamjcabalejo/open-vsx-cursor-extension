@@ -15,8 +15,13 @@ export interface WorkspaceManifest {
   claude?: { appliedAt: string };
   /** Workspace files we wrote for Copilot (relative paths). */
   copilot?: { files: string[]; appliedAt: string };
-  /** When we wrote AGENTS.md in this workspace for Codex. */
-  codex?: { workspaceAgents: true; appliedAt: string };
+  /** Codex: workspace AGENTS.md and optional `.codex/` (rules + skills). */
+  codex?: {
+    workspaceAgents?: true;
+    projectCodexDir?: true;
+    skills?: string[];
+    appliedAt: string;
+  };
 }
 
 /** User manifest: stored in ~/.plan-code-review-workflow-applied.json. Records user-level applied items. */
@@ -198,8 +203,13 @@ export function getAppliedWorkflowLog(workspaceRootPath: string | undefined): {
       );
     }
     if (workspace.codex) {
+      const parts: string[] = [];
+      if (workspace.codex.projectCodexDir) parts.push(".codex/");
+      if (workspace.codex.workspaceAgents) parts.push("AGENTS.md");
+      if (workspace.codex.skills?.length)
+        parts.push(`skills: ${workspace.codex.skills.length}`);
       summary.push(
-        `[Workspace] Codex: AGENTS.md (applied ${workspace.codex.appliedAt})`,
+        `[Workspace] Codex: ${parts.join(", ") || "applied"} (applied ${workspace.codex.appliedAt})`,
       );
     }
   }

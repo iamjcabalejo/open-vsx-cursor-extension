@@ -21,12 +21,12 @@ This extension is built around two always-on rules. Every assistant gets both af
 
 After apply, each assistant loads its own canonical token rule:
 
-| Assistant          | Token policy file                                                            |
-| ------------------ | ---------------------------------------------------------------------------- |
-| **Cursor**         | `.cursor/rules/token-policy.mdc` (`alwaysApply: true`)                       |
-| **Claude Code**    | `.claude/rules/token-policy.md` (project or `~/.claude/rules/`)              |
-| **GitHub Copilot** | `.github/instructions/token-policy.instructions.md` (`applyTo: "**"`)        |
-| **Codex**          | `~/.codex/rules/token-policy.md` (user) or summarized in project `AGENTS.md` |
+| Assistant          | Token policy file                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| **Cursor**         | `.cursor/rules/token-policy.mdc` (`alwaysApply: true`)                              |
+| **Claude Code**    | `.claude/rules/token-policy.md` (project or `~/.claude/rules/`)                     |
+| **GitHub Copilot** | `.github/instructions/token-policy.instructions.md` (`applyTo: "**"`)               |
+| **Codex**          | `.codex/rules/token-policy.md` (project) or `~/.codex/rules/token-policy.md` (user) |
 
 **Session entry flow (every phase):**
 
@@ -138,9 +138,9 @@ The extension keeps a manifest of what it applied (workspace and user). Remove u
 | **Cursor**         | `.cursor/rules/token-policy.mdc` (**always on**), compounding cycle, core standards, agents, skills, commands, hooks                                                                                                            |
 | **Claude Code**    | `.claude/rules/token-policy.md`, cycle, agents, skills, `CLAUDE.md`, hooks — project **or** `~/.claude/`                                                                                                                        |
 | **GitHub Copilot** | **`.github/instructions/token-policy.instructions.md`** + **`compounding-dev-cycle.instructions.md`** (`applyTo: "**"`), **`copilot-instructions.md`**, agents, workflows, **`AGENTS.md`**; user **prompts** for all workspaces |
-| **Codex**          | **Project:** workspace **`AGENTS.md`**. **User:** **`~/.codex/AGENTS.md`**, **`~/.codex/rules/token-policy.md`**, **`~/.codex/skills/`**                                                                                        |
+| **Codex**          | **Project:** **`.codex/`** (rules + skills) and **`AGENTS.md`**. **User:** **`~/.codex/AGENTS.md`**, **`~/.codex/rules/`**, **`~/.codex/skills/`**                                                                              |
 
-**Codex:** Pick **project** for repo-specific rules in `AGENTS.md`, or **user** for global cycle, token policy, and skills under `~/.codex/`. Install both locations with two apply runs if you want user-level skills plus a project `AGENTS.md`.
+**Codex:** Pick **project** for `.codex/` and `AGENTS.md` in this repo only (nothing written to `~/.codex`). Pick **user** for global install under `~/.codex/`. Use two apply runs if you want both.
 
 **Cursor:** Use `/feature-plan`, `/project-manager`, `/api-new`, etc. **Others:** Reference the generated files in chat (e.g. “Follow `CLAUDE.md`”, “Use the `code-review` skill”).
 

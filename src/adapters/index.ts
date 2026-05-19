@@ -40,7 +40,7 @@ const adapters: WorkflowAdapter[] = [
     id: "codex",
     name: "Codex",
     description:
-      "Install Codex workflow in project (AGENTS.md) or user dir (~/.codex)",
+      "Install Codex workflow in project (.codex/) or user dir (~/.codex)",
     extensionId: "openai.chatgpt",
     apply: applyCodex,
     remove: removeCodex,

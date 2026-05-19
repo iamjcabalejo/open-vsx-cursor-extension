@@ -34,16 +34,19 @@ function copyDirRecursive(srcDir: string, destDir: string): void {
   }
 }
 
-const CODEX_SKILLS_ROOT = path.join(os.homedir(), ".codex", "skills");
+const DEFAULT_CODEX_SKILLS_ROOT = path.join(os.homedir(), ".codex", "skills");
 
 /**
- * Remove from ~/.codex/skills only the skill folders with the given names.
- * Use this when removing only extension-installed skills (from manifest).
+ * Remove skill folders with the given names from a Codex skills directory.
+ * Defaults to ~/.codex/skills; pass project `.codex/skills` for workspace installs.
  */
-export function removeCodexSkillsByNames(skillNames: string[]): InstallCodexSkillsResult {
+export function removeCodexSkillsByNames(
+  skillNames: string[],
+  skillsDestRoot: string = DEFAULT_CODEX_SKILLS_ROOT,
+): InstallCodexSkillsResult {
   const removed: string[] = [];
   for (const name of skillNames) {
-    const destPath = path.join(CODEX_SKILLS_ROOT, name);
+    const destPath = path.join(skillsDestRoot, name);
     if (fs.existsSync(destPath)) {
       try {
         fs.rmSync(destPath, { recursive: true });
@@ -61,26 +64,27 @@ export function removeCodexSkillsByNames(skillNames: string[]): InstallCodexSkil
   }
   const details =
     removed.length > 0
-      ? [`Removed from ${CODEX_SKILLS_ROOT}`, ...removed.map((n) => `  - ${n}`)]
+      ? [`Removed from ${skillsDestRoot}`, ...removed.map((n) => `  - ${n}`)]
       : undefined;
   return {
     success: true,
     message:
       removed.length > 0
         ? `Removed ${removed.length} skill(s) from Codex.`
-        : "No matching skills found in ~/.codex/skills.",
+        : `No matching skills found in ${skillsDestRoot}.`,
     details,
     installed: removed,
   };
 }
 
 /**
- * Sync skill folders from a source directory to ~/.codex/skills.
- * Each subfolder must contain SKILL.md; others are skipped.
- * Existing skills with the same name are overwritten (updated).
- * Use this for both "Apply workflow for Codex" and "Install skills to Codex".
+ * Sync skill folders from a source directory to a Codex skills root.
+ * Defaults to ~/.codex/skills; pass `<workspace>/.codex/skills` for project installs.
  */
-export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexSkillsResult {
+export function syncSkillsToCodexFromSource(
+  skillsSrcDir: string,
+  skillsDestRoot: string = DEFAULT_CODEX_SKILLS_ROOT,
+): InstallCodexSkillsResult {
   if (!fs.existsSync(skillsSrcDir)) {
     return {
       success: false,
@@ -111,7 +115,7 @@ export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexS
       skipped.push(e.name);
       continue;
     }
-    const destPath = path.join(CODEX_SKILLS_ROOT, e.name);
+    const destPath = path.join(skillsDestRoot, e.name);
     if (fs.existsSync(destPath)) {
       fs.rmSync(destPath, { recursive: true });
     }
@@ -141,7 +145,7 @@ export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexS
   }
 
   const details: string[] = [
-    `Synced to ${CODEX_SKILLS_ROOT}`,
+    `Synced to ${skillsDestRoot}`,
     ...installed.map((name) => `  - ${name}`),
   ];
   if (skipped.length > 0) {
@@ -164,7 +168,9 @@ export function syncSkillsToCodexFromSource(skillsSrcDir: string): InstallCodexS
  * Remove from ~/.codex/skills only the skill folders that exist in the extension's workflow/codex/skills.
  * Does not remove other skills the user may have added.
  */
-export function removeCodexSkillsFromExtension(extensionPath: string): InstallCodexSkillsResult {
+export function removeCodexSkillsFromExtension(
+  extensionPath: string,
+): InstallCodexSkillsResult {
   const skillsSrcDir = path.join(extensionPath, "workflow", "codex", "skills");
   if (!fs.existsSync(skillsSrcDir)) {
     return {
@@ -188,7 +194,7 @@ export function removeCodexSkillsFromExtension(extensionPath: string): InstallCo
 
   for (const e of entries) {
     if (!e.isDirectory()) continue;
-    const destPath = path.join(CODEX_SKILLS_ROOT, e.name);
+    const destPath = path.join(DEFAULT_CODEX_SKILLS_ROOT, e.name);
     if (fs.existsSync(destPath)) {
       try {
         fs.rmSync(destPath, { recursive: true });
@@ -207,14 +213,17 @@ export function removeCodexSkillsFromExtension(extensionPath: string): InstallCo
 
   const details =
     removed.length > 0
-      ? [`Removed from ${CODEX_SKILLS_ROOT}`, ...removed.map((name) => `  - ${name}`)]
+      ? [
+          `Removed from ${DEFAULT_CODEX_SKILLS_ROOT}`,
+          ...removed.map((name) => `  - ${name}`),
+        ]
       : undefined;
   return {
     success: true,
     message:
       removed.length > 0
         ? `Removed ${removed.length} skill(s) from Codex.`
-        : "No matching skills found in ~/.codex/skills.",
+        : `No matching skills found in ${DEFAULT_CODEX_SKILLS_ROOT}.`,
     details,
     installed: removed,
   };
@@ -228,7 +237,7 @@ export function removeCodexSkillsFromExtension(extensionPath: string): InstallCo
  */
 export function installCodexSkills(
   workspaceRootPath: string | undefined,
-  extensionPath?: string
+  extensionPath?: string,
 ): InstallCodexSkillsResult {
   const skillsSrc = extensionPath
     ? path.join(extensionPath, "workflow", "codex", "skills")
@@ -239,7 +248,8 @@ export function installCodexSkills(
   if (!skillsSrc) {
     return {
       success: false,
-      message: "No workspace folder open. Open a folder first, then run the command again.",
+      message:
+        "No workspace folder open. Open a folder first, then run the command again.",
     };
   }
 
