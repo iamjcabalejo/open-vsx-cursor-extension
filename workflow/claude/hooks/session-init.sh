@@ -1,14 +1,8 @@
 #!/bin/bash
-# Runs when a new composer session starts.
-# Can inject env vars, additional context, or block session creation.
-# Receives JSON via stdin: {"session_id":"...","is_background_agent":false,...}
-# Output: {"env":{...},"additional_context":"...","continue":true}
-#
-# Aligns with compounding-dev-cycle.mdc: injects cycle reminder so agents
-# follow Plan → Code → Review/Test → Plan and use plan doc as contract.
+# Aligns with: token-policy.md, compounding-dev-cycle.md, core-standards.md
+# Receives JSON via stdin (Claude Code SessionStart hook).
 
-CONTEXT="Follow Plan → Code → Review/Test → Plan (.claude/rules/compounding-dev-cycle.mdc). Plan first (feature-plan), then Code to the plan; Review/Test produces rework list; repeat until production ready. Plan doc is the single source of truth—update it when scope or acceptance criteria change."
+CONTEXT='Plan-Code-Review workflow: Policies in .claude/rules/ - (1) token-policy.md: refine user input, hand off to skills/agents, use internal XML blueprints only for complex/ambiguous/high-stakes work. (2) compounding-dev-cycle.md: ASK->PLAN->AGENT, Plan->Code->Review; plan document is the contract. (3) core-standards.md: applies with (1)(2); type safety, errors, security boundaries. Rationale (XML): extension README (Why XML beats a single prose prompt).'
 
-# Allow session and inject cycle context for handoff-aware behavior
 printf '{"continue":true,"additional_context":"%s"}\n' "$(echo "$CONTEXT" | sed 's/"/\\"/g')"
 exit 0

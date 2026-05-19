@@ -5,79 +5,93 @@ Follow the compounding dev cycle and apply these rules and agent roles.
 ## Mode mapping (Codex + cross-assistant)
 
 Use Codex behavior explicitly by phase:
+
 - **Plan/discovery:** plan-before-execute behavior (planning only; no implementation).
 - **Implementation:** agent execution behavior (code changes and tests).
 - **Review/explanation:** read-only review behavior (no edits unless explicitly requested).
 
 Cross-assistant equivalence:
+
 - Cursor: Plan / Agent / Ask
 - Claude Code: Plan / Normal (or Auto-accept) / Plan-or-Normal-read-only
 - GitHub Copilot: Plan / Agent / Ask
 
-## Token-efficient response policy (always on)
+## Token policy (always on)
 
-Apply token-efficient mode by default for all Codex workflows in this repo.
-
-- **Default intensity:** `full`
-- **Supported levels:** `lite`, `full`, `ultra`
-- **Rule:** concise but complete; never drop required structures from commands/skills/reviews.
-- **Auto-clarity override:** switch to explicit full-language warnings for destructive actions, security risks, irreversible changes, or ambiguity-prone multi-step instructions.
-
-### RiskControls
-- **R-1 Clarity regression:** enforce auto-clarity override and no-ambiguity warnings.
-- **R-2 Cross-ecosystem drift:** keep this policy semantically aligned with Cursor/Copilot/Claude workflow docs.
-- **R-3 Format conflicts:** preserve mandatory output templates before compressing prose.
-- **R-4 Level inconsistency:** keep `lite/full/ultra` definitions and examples aligned in skills, commands, and agent files.
+Apply **token-policy** below in every session (also in `~/.codex/rules/token-policy.md` when installed): refine → hand off, concise but complete responses, lean diffs, internal XML blueprints for complex work.
 
 ## Rules
+
+### token policy
+
+# TokenPolicy
+
+**Authoritative** for how the agent spends context. `core-standards` and `compounding-dev-cycle` in this file point here; stack rules are additive.
+
+**Goal:** Spend context on actions and decisions. Avoid noise, repeated reads, and oversized replies.
+
+**Session entry flow:** Ingest → **refine** (objective, scope, constraints; XML blueprint when complex) → **hand off** a tight spec to skills/agents—not a restatement. Layers on compounding-dev-cycle (ASK → PLAN → AGENT).
+
+**Responses:** Concise and complete; no filler or engagement bait; substance first. **Code:** smallest diff; code citations; batch reads; search before full-file read. **Complex work:** short internal XML blueprint (`<role>`, `<task>`, `<forbidden>`, `<error_handling>`, `<output_format>`, optional `<analysis>`). Full pattern: extension README → Why XML beats a single prose prompt; or `~/.codex/rules/token-policy.md`.
 
 ### core standards
 
 # Core Standards
 
 ## Type Safety
+
 - Prefer explicit types over `any`; use `unknown` when type is truly unknown, then narrow
 - Avoid type assertions (`as`) unless necessary; prefer type guards or better typing
 
 ## Error Handling
+
 - Handle errors explicitly; never swallow with empty `catch` blocks
 - Log errors before rethrowing; include context (e.g., operation name, input summary)
 - Use custom error classes for domain-specific failures when helpful
 
 ## Function Design
+
 - Keep functions focused on one concern; extract when they exceed ~30 lines
 - Prefer pure functions when possible; isolate side effects at boundaries
 - Use early returns and guard clauses to reduce nesting
 
 ## Naming
+
 - Use meaningful names; avoid abbreviations except common ones (`id`, `url`, `err`, `req`, `res`)
 - Booleans: `isLoading`, `hasError`, `canEdit`
 - Functions: verb-first (`fetchUser`, `validateInput`, `formatDate`)
 
 ## General
+
 - Prefer `const` over `let`; avoid `var`
 - Avoid magic numbers and strings; extract to named constants
-- Comment *why*, not *what*; code should be self-explanatory
+- Comment _why_, not _what_; code should be self-explanatory
+
+**Session communication:** Answer shape, handoff brevity, and batched tool use follow **token-policy** above; domain rules below are additive. On conflict about verbosity or diffs, **token-policy wins**.
 
 ### api routes
 
 # API Routes
 
 ## Validation
+
 - Validate all input at the route boundary before business logic
 - Use a schema library (Zod, Yup) for request body, query, and params
 - Return 400 for invalid input with field-level error details
 
 ## Response Shape
+
 - Success: return the resource or `{ data: ... }`; use 200 (GET/PUT/PATCH), 201 (POST), 204 (DELETE)
 - Errors: use consistent shape: `{ error: { code: string, message: string, details?: array } }`
 - Never expose stack traces, internal paths, or sensitive data in production
 
 ## Security
+
 - Authenticate and authorize before processing; return 401/403 early
 - Use parameterized queries; never concatenate user input into SQL
 
 ## Structure
+
 - Keep route handlers thin; delegate to service/use-case layer
 - Use try/catch; map known errors to status codes; log unexpected errors
 
@@ -109,7 +123,7 @@ Apply token-efficient mode by default for all Codex workflows in this repo.
 
 ### compounding dev cycle
 
-Follow **Plan → Code → Review/Test → Plan** for every feature. Each phase produces handoff artifacts. See user-level AGENTS.md (~/.codex/AGENTS.md) for full cycle; project-level rules above apply in every phase.
+Follow **Plan → Code → Review/Test → Plan** for every feature. **First** apply token-policy **Session entry flow** (refine → hand off), then ASK/PLAN/AGENT. See user-level AGENTS.md (~/.codex/AGENTS.md) for full cycle; prose in each phase is lean per token-policy.
 
 ## Agents (use when relevant)
 
@@ -135,4 +149,4 @@ Skills for each agent live in `~/.codex/skills/<name>/SKILL.md`. Apply the compo
 
 ---
 
-*Generated by Plan-Code-Review Workflow extension for Codex.*
+_Generated by Plan-Code-Review Workflow extension for Codex._

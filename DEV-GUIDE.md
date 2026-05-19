@@ -27,17 +27,17 @@ So: **we don’t add `.claude` (or Copilot/Codex-generated folders) to the repo*
 
 ---
 
-## 3. What *is* in the repo (and the extension package)
+## 3. What _is_ in the repo (and the extension package)
 
-| Path | Purpose |
-|------|--------|
-| `workflow/cursor/` | Cursor-only rules, agents, skills, commands, hooks. **Shipped in the extension**; Cursor adapter copies to workspace `.cursor/`. |
-| `workflow/claude/` | Claude-only agents, rules, skills, hooks, CLAUDE.md. Adapter copies to workspace `.claude/` and `CLAUDE.md` (or `~/.claude/`). |
-| `workflow/copilot/` | Copilot/GitHub layout: copilot-instructions.md, instructions/, agents/, workflows/, AGENTS.md, user-instructions.md. Adapter copies to workspace `.github/` and root `AGENTS.md`. |
-| `workflow/codex/` | Codex skills and AGENTS.md (workspace + user). Adapter syncs skills to `~/.codex/skills/` and writes AGENTS.md. |
+| Path                      | Purpose                                                                                                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workflow/cursor/`        | Cursor-only rules, agents, skills, commands, hooks. **Shipped in the extension**; Cursor adapter copies to workspace `.cursor/`.                                                  |
+| `workflow/claude/`        | Claude-only agents, rules, skills, hooks, CLAUDE.md. Adapter copies to workspace `.claude/` and `CLAUDE.md` (or `~/.claude/`).                                                    |
+| `workflow/copilot/`       | Copilot/GitHub layout: copilot-instructions.md, instructions/, agents/, workflows/, AGENTS.md, user-instructions.md. Adapter copies to workspace `.github/` and root `AGENTS.md`. |
+| `workflow/codex/`         | Codex skills and AGENTS.md (workspace + user). Adapter syncs skills to `~/.codex/skills/` and writes AGENTS.md.                                                                   |
 | `workflow/cursor-plugin/` | Cursor plugin manifest (e.g. `plugin.json`). **Shipped in the extension**; Cursor adapter copies to workspace `.cursor-plugin/`. Paths inside reference `.cursor/` (destination). |
-| `src/adapters/` | Adapter logic: each reads from `extensionPath/workflow/<assistant>/` only, writes assistant-specific files into the workspace or user dir. |
-| `src/extension.ts` | VS Code extension entry: commands and wiring to adapters. |
+| `src/adapters/`           | Adapter logic: each reads from `extensionPath/workflow/<assistant>/` only, writes assistant-specific files into the workspace or user dir.                                        |
+| `src/extension.ts`        | VS Code extension entry: commands and wiring to adapters.                                                                                                                         |
 
 The extension **must** include `workflow/**` in its package. If `workflow/**` is excluded via `.vscodeignore`, apply commands fail with "Extension workflow files not found" and no `.claude`, `.github`, or Codex files are created. The **shipped** source for Cursor apply is `workflow/cursor/` and `workflow/cursor-plugin/`.
 
@@ -50,14 +50,14 @@ When you run `vsce package`, the default is to include all files except those ma
 - **We must not exclude** `workflow/**`. If it is in `.vscodeignore`, the packaged extension won’t contain the workflow trees (including `workflow/cursor-plugin/`), and **Apply workflow for…** will not create `.cursor`, `.claude`, `.github`, or Codex files.
 - **We do exclude** `src/**` (TypeScript source); the built output lives in `out/`. We also exclude dev-only files (`tsconfig.json`, `node_modules`, `docs/`, etc.) as needed.
 
-So: **we don’t add pre-built `.claude` or `.github` to the repo**; we ship **`workflow/`** and ensure it is *not* ignored so the package contains the four trees and adapters can copy them into the user’s workspace.
+So: **we don’t add pre-built `.claude` or `.github` to the repo**; we ship **`workflow/`** and ensure it is _not_ ignored so the package contains the four trees and adapters can copy them into the user’s workspace.
 
 ---
 
 ## 5. How adapters work
 
 - **Detection** (`src/adapters/detect.ts`) — Determines which AI assistants are available (Cursor app name, or extensions like `Anthropic.claude-code`, `GitHub.copilot`, `openai.chatgpt`).
-- **Apply** — Each adapter receives `AdapterContext`: `extensionPath` (extension root; workflow trees under `workflow/<assistant>/`), `workspaceRootPath` (the first workspace folder), and optional install targets (e.g. `claudeInstallTarget`, `cursorInstallTarget`). Each adapter reads **only** from `extensionPath/workflow/<assistant>/` (and for Cursor, `workflow/cursor-plugin/` for the plugin manifest) and writes into `workspaceRootPath` (e.g. `.cursor/`, `.claude/`, `.github/`, `AGENTS.md`) or, for user-level apply, into the user’s home dir (e.g. `~/.claude/`, `~/.codex/`).
+- **Apply** — Each adapter receives `AdapterContext`: `extensionPath` (extension root; workflow trees under `workflow/<assistant>/`), `workspaceRootPath` (the first workspace folder), and optional install targets (e.g. `claudeInstallTarget`, `cursorInstallTarget`, `codexInstallTarget`). Each adapter reads **only** from `extensionPath/workflow/<assistant>/` (and for Cursor, `workflow/cursor-plugin/` for the plugin manifest) and writes into `workspaceRootPath` (e.g. `.cursor/`, `.claude/`, `.github/`, `AGENTS.md`) or, for user-level apply, into the user’s home dir (e.g. `~/.claude/`, `~/.codex/`).
 
 So:
 
@@ -90,12 +90,12 @@ All of this happens in the user’s workspace (or user dir) when they run the co
 
 ## 8. Quick reference
 
-| Question | Answer |
-|----------|--------|
-| Why is there no `.claude` in the repo? | `.claude` is created in the user’s workspace (or `~/.claude/`) by the Claude adapter when you run **Apply workflow for Claude Code**. The repo holds the **source** in `workflow/claude/`. |
-| Why must `workflow/` be in the extension package? | Adapters read from `extensionPath/workflow/<assistant>/` to copy or sync content; if `workflow/**` is excluded via `.vscodeignore`, the package has no workflow trees and apply commands fail. |
-| Where does `.claude` get created? | When you run **Apply workflow for Claude Code**, you choose **project root** (first workspace folder: `.claude/`, `CLAUDE.md`) or **user directory** (`~/.claude/`). Content is copied from `workflow/claude/`. |
-| Where do I edit rules/agents for each assistant? | Edit **`workflow/cursor/`**, **`workflow/claude/`**, **`workflow/copilot/`**, or **`workflow/codex/`** depending on which assistant you want to change. See README “Customization” and the table in §3 above. |
+| Question                                          | Answer                                                                                                                                                                                                          |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Why is there no `.claude` in the repo?            | `.claude` is created in the user’s workspace (or `~/.claude/`) by the Claude adapter when you run **Apply workflow for Claude Code**. The repo holds the **source** in `workflow/claude/`.                      |
+| Why must `workflow/` be in the extension package? | Adapters read from `extensionPath/workflow/<assistant>/` to copy or sync content; if `workflow/**` is excluded via `.vscodeignore`, the package has no workflow trees and apply commands fail.                  |
+| Where does `.claude` get created?                 | When you run **Apply workflow for Claude Code**, you choose **project root** (first workspace folder: `.claude/`, `CLAUDE.md`) or **user directory** (`~/.claude/`). Content is copied from `workflow/claude/`. |
+| Where do I edit rules/agents for each assistant?  | Edit **`workflow/cursor/`**, **`workflow/claude/`**, **`workflow/copilot/`**, or **`workflow/codex/`** depending on which assistant you want to change. See README “Customization” and the table in §3 above.   |
 
 ---
 

@@ -12,7 +12,7 @@
       "name": "plan-code-review-workflow",
       "source": ".",
       "description": "Apply the Plan → Code → Review cycle with commands, agents, skills, rules, and hooks. Works with Cursor, Claude Code, Copilot, or Codex.",
-      "version": "5.1.0",
+      "version": "5.2.0",
       "author": {
         "name": "Jhon Cabalejo",
         "email": "iamjcabalejo@gmail.com"

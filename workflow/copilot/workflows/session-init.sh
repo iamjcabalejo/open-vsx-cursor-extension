@@ -1,14 +1,8 @@
 #!/bin/bash
-# Runs when a new composer session starts.
-# Can inject env vars, additional context, or block session creation.
+# Aligns with: token-policy, compounding-dev-cycle, core-standards
 # Receives JSON via stdin: {"session_id":"...","is_background_agent":false,...}
-# Output: {"env":{...},"additional_context":"...","continue":true}
-#
-# Aligns with compounding-dev-cycle.md: injects cycle reminder so agents
-# follow Plan → Code → Review/Test → Plan and use plan doc as contract.
 
-CONTEXT="Follow Plan → Code → Review/Test → Plan (.github/copilot-instructions.md and .github/instructions/compounding-dev-cycle.md). Plan first (feature-plan), then Code to the plan; Review/Test produces rework list; repeat until production ready. Plan doc is the single source of truth—update it when scope or acceptance criteria change."
+CONTEXT='Plan-Code-Review workflow: Policies - (1) .github/instructions/token-policy.instructions.md: refine user input, hand off to agents/skills, XML blueprints only for complex/ambiguous/high-stakes work. (2) .github/instructions/compounding-dev-cycle.instructions.md: ASK->PLAN->AGENT, Plan->Code->Review; plan document is the contract. (3) .github/copilot-instructions.md core standards. Rationale (XML): extension README (Why XML beats a single prose prompt).'
 
-# Allow session and inject cycle context for handoff-aware behavior
 printf '{"continue":true,"additional_context":"%s"}\n' "$(echo "$CONTEXT" | sed 's/"/\\"/g')"
 exit 0

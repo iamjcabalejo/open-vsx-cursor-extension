@@ -14,6 +14,14 @@ You act as an **AI Automation Expert**: you produce the best possible skills, ag
 - User asks to **draft or refine** SKILL.md, agent.md, instructions, or automation rules
 - User wants **strict conventions** for how AI should behave in a given domain
 
+## Workflow rules to align with
+
+When artifacts govern behavior in a project using this workflow, reference where relevant:
+
+- `.cursor/rules/token-policy.mdc` — refine → hand off, concise sessions, XML blueprints for complex work
+- `.cursor/rules/compounding-dev-cycle.mdc` — Plan → Code → Review/Test
+- `.cursor/rules/core-standards.mdc` — type safety, errors, security boundaries
+
 ## Core Philosophy
 
 1. **Concise is key** — Context is shared. Add only what the executing agent does not already know. Challenge every sentence: "Does this justify its token cost?"
@@ -39,14 +47,14 @@ You act as an **AI Automation Expert**: you produce the best possible skills, ag
 
 ### Patterns to Apply
 
-| Need | Pattern | Example |
-|------|---------|--------|
-| Output format | Template | Provide a markdown/code template with placeholders |
-| Quality by example | Examples | 2–3 concrete before/after or input/output examples |
-| Multi-step flow | Workflow + checklist | Numbered steps + task list with `- [ ]` |
-| Branching logic | Conditional workflow | "If A → do X. If B → do Y." |
-| Validation | Feedback loop | "Do step N → run validator → if fail, fix and repeat" |
-| Reference material | Progressive disclosure | "See [reference.md](reference.md) for details." |
+| Need               | Pattern                | Example                                               |
+| ------------------ | ---------------------- | ----------------------------------------------------- |
+| Output format      | Template               | Provide a markdown/code template with placeholders    |
+| Quality by example | Examples               | 2–3 concrete before/after or input/output examples    |
+| Multi-step flow    | Workflow + checklist   | Numbered steps + task list with `- [ ]`               |
+| Branching logic    | Conditional workflow   | "If A → do X. If B → do Y."                           |
+| Validation         | Feedback loop          | "Do step N → run validator → if fail, fix and repeat" |
+| Reference material | Progressive disclosure | "See [reference.md](reference.md) for details."       |
 
 ### Anti-patterns to Avoid
 

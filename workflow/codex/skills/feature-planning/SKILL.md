@@ -9,18 +9,14 @@ description: Break features into implementation tasks for backend, frontend, and
 
 When this skill is used (including by the **feature-plan** command), work MUST be done in **Plan mode**. No implementation: no application code, no file creation except the plan artifact at `docs/plans/<feature-slug>.md`. Planning agents may inform scope and tasks; they are not spawned for Code or Review. If asked to implement, decline and direct to run **project-manager** with the plan.
 
-## Token-efficient response policy (always on)
+## Token policy (mandatory)
 
-Apply token-efficient mode when producing plan content.
-
-- **Default intensity:** `full` (`lite`/`ultra` optional when explicitly requested).
-- **Rule:** concise but complete; do not omit required plan sections, AC numbering, or file-path specificity.
-- **Auto-clarity override:** use explicit full-language wording for destructive/security-sensitive/irreversible guidance and ambiguity-prone multi-step instructions.
-- **No ambiguous compression:** keep scope boundaries, risks, mitigations, and pass/fail criteria explicit.
+Apply **token-policy** (`~/.codex/rules/token-policy.md` or AGENTS.md) when producing plan content: refine the request, then author the plan; concise but complete; keep scope boundaries, risks, mitigations, AC numbering, file paths, and pass/fail criteria explicit.
 
 ## Clarification-first behavior (required)
 
 Planning must be interactive when details are missing. Before finalizing the plan, ask relevant clarifying questions about:
+
 - business objective and success outcome
 - in-scope vs out-of-scope boundaries
 - user roles and primary flows
@@ -50,11 +46,13 @@ Plans produced by **feature-plan** must include these sections so **project-mana
 - **Dependencies / env**: Packages, env vars, config changes
 
 ## Task Blocks for Hand-off
+
 - **Backend Tasks**: Setup → Database → API → Security
 - **Frontend Tasks**: Components → Pages → Integration → Polish
 - **Integration & Testing**: E2E flows, critical path coverage
 
 ## Per-Block Checklist
+
 - [ ] Dependencies and env vars listed
 - [ ] File changes (new/modified) specified
 - [ ] API contract or schema described
@@ -64,6 +62,7 @@ Plans produced by **feature-plan** must include these sections so **project-mana
 ## Detail level (for project-manager handoff)
 
 Plans must be **detailed** so implementers do not guess. Include:
+
 - **Task analysis**: Type, complexity, estimated effort, priority
 - **Acceptance criteria**: Numbered (AC-1, AC-2, …), testable (Given/When/Then or pass/fail)
 - **Technical design**: Named components, per-endpoint (method, path, request/response shape), data model, data flow
@@ -77,6 +76,7 @@ Plans must be **detailed** so implementers do not guess. Include:
 See `AGENTS.md commands/misc/feature-plan.md` section "Detailed output format (mandatory)" for the full template.
 
 ## Hand-off Order
+
 1. backend-architect (API contract first)
 2. frontend-architect (depends on API)
 3. e2e-runner (validates full stack)
@@ -94,6 +94,7 @@ See `AGENTS.md commands/misc/feature-plan.md` section "Detailed output format (m
 - [ ] Plan path is `docs/plans/<feature-slug>.md`. User is directed to run project-manager with that path for the next step.
 
 ## Context to Pass
+
 - Feature overview
 - Technical design (components, endpoints, schema)
 - File changes

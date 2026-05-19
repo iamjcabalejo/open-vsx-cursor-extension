@@ -20,27 +20,33 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.workspace.openTextDocument(uri).then((doc) => {
         vscode.window.showTextDocument(doc, { preview: false });
       });
-    }
+    },
   );
 
   const openPublishing = vscode.commands.registerCommand(
     "plan-code-review-workflow.openPublishing",
     () => {
-      const uri = vscode.Uri.joinPath(vscode.Uri.file(basePath), "PUBLISHING.md");
+      const uri = vscode.Uri.joinPath(
+        vscode.Uri.file(basePath),
+        "PUBLISHING.md",
+      );
       vscode.workspace.openTextDocument(uri).then((doc) => {
         vscode.window.showTextDocument(doc, { preview: false });
       });
-    }
+    },
   );
 
   const openDevGuide = vscode.commands.registerCommand(
     "plan-code-review-workflow.openDevGuide",
     () => {
-      const uri = vscode.Uri.joinPath(vscode.Uri.file(basePath), "DEV-GUIDE.md");
+      const uri = vscode.Uri.joinPath(
+        vscode.Uri.file(basePath),
+        "DEV-GUIDE.md",
+      );
       vscode.workspace.openTextDocument(uri).then((doc) => {
         vscode.window.showTextDocument(doc, { preview: false });
       });
-    }
+    },
   );
 
   const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -50,7 +56,9 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
   /** Show picker for Claude install location; returns undefined if cancelled. */
-  async function pickClaudeInstallTarget(): Promise<"project" | "user" | undefined> {
+  async function pickClaudeInstallTarget(): Promise<
+    "project" | "user" | undefined
+  > {
     const choice = await vscode.window.showQuickPick(
       [
         {
@@ -69,13 +77,42 @@ export function activate(context: vscode.ExtensionContext): void {
       {
         title: "Where should the Claude workflow be installed?",
         matchOnDescription: true,
-      }
+      },
+    );
+    return choice?.target;
+  }
+
+  /** Show picker for Codex install location; returns undefined if cancelled. */
+  async function pickCodexInstallTarget(): Promise<
+    "project" | "user" | undefined
+  > {
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: "Project root",
+          description: "AGENTS.md in this workspace",
+          detail: "Apply to the current project only",
+          target: "project" as const,
+        },
+        {
+          label: "User directory (~/.codex)",
+          description: "AGENTS.md, rules, and skills in ~/.codex",
+          detail: "Install once, use in every project",
+          target: "user" as const,
+        },
+      ],
+      {
+        title: "Where should the Codex workflow be installed?",
+        matchOnDescription: true,
+      },
     );
     return choice?.target;
   }
 
   /** Show picker for Cursor install location; returns undefined if cancelled. */
-  async function pickCursorInstallTarget(): Promise<"project" | "user" | undefined> {
+  async function pickCursorInstallTarget(): Promise<
+    "project" | "user" | undefined
+  > {
     const choice = await vscode.window.showQuickPick(
       [
         {
@@ -94,7 +131,7 @@ export function activate(context: vscode.ExtensionContext): void {
       {
         title: "Where should the Cursor workflow be installed?",
         matchOnDescription: true,
-      }
+      },
     );
     return choice?.target;
   }
@@ -102,7 +139,8 @@ export function activate(context: vscode.ExtensionContext): void {
   function applyAndNotify(
     adapterId: AIAssistant,
     claudeTarget?: "project" | "user",
-    cursorTarget?: "project" | "user"
+    cursorTarget?: "project" | "user",
+    codexTarget?: "project" | "user",
   ): void {
     const adapter = getAdapter(adapterId);
     if (!adapter) {
@@ -112,18 +150,21 @@ export function activate(context: vscode.ExtensionContext): void {
     const ctx = {
       ...adapterContext,
       workspaceRootPath: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
-      ...(adapterId === "claude" && claudeTarget !== undefined && { claudeInstallTarget: claudeTarget }),
-      ...(adapterId === "cursor" && cursorTarget !== undefined && { cursorInstallTarget: cursorTarget }),
+      ...(adapterId === "claude" &&
+        claudeTarget !== undefined && { claudeInstallTarget: claudeTarget }),
+      ...(adapterId === "cursor" &&
+        cursorTarget !== undefined && { cursorInstallTarget: cursorTarget }),
+      ...(adapterId === "codex" &&
+        codexTarget !== undefined && { codexInstallTarget: codexTarget }),
     };
     adapter.apply(ctx).then((result) => {
       if (result.success) {
         const detail = result.details?.length
           ? "\n" + result.details.join("\n")
           : "";
-        vscode.window.showInformationMessage(
-          result.message + detail,
-          { modal: false }
-        );
+        vscode.window.showInformationMessage(result.message + detail, {
+          modal: false,
+        });
       } else {
         vscode.window.showErrorMessage(result.message);
       }
@@ -136,7 +177,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const recommended = recommendAssistant();
       if (!recommended) {
         vscode.window.showWarningMessage(
-          "No supported AI assistant detected. Install Claude Code, GitHub Copilot, or Codex, or use this command in Cursor."
+          "No supported AI assistant detected. Install Claude Code, GitHub Copilot, or Codex, or use this command in Cursor.",
         );
         return;
       }
@@ -148,10 +189,14 @@ export function activate(context: vscode.ExtensionContext): void {
         const target = await pickCursorInstallTarget();
         if (target === undefined) return;
         applyAndNotify("cursor", undefined, target);
+      } else if (recommended === "codex") {
+        const target = await pickCodexInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("codex", undefined, undefined, target);
       } else {
         applyAndNotify(recommended);
       }
-    }
+    },
   );
 
   const applyWorkflowPick = vscode.commands.registerCommand(
@@ -179,10 +224,14 @@ export function activate(context: vscode.ExtensionContext): void {
         const target = await pickCursorInstallTarget();
         if (target === undefined) return;
         applyAndNotify("cursor", undefined, target);
+      } else if (adapter.id === "codex") {
+        const target = await pickCodexInstallTarget();
+        if (target === undefined) return;
+        applyAndNotify("codex", undefined, undefined, target);
       } else {
         applyAndNotify(adapter.id);
       }
-    }
+    },
   );
 
   const applyWorkflowCursor = vscode.commands.registerCommand(
@@ -191,7 +240,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const target = await pickCursorInstallTarget();
       if (target === undefined) return;
       applyAndNotify("cursor", undefined, target);
-    }
+    },
   );
   const applyWorkflowClaude = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowClaude",
@@ -199,29 +248,38 @@ export function activate(context: vscode.ExtensionContext): void {
       const target = await pickClaudeInstallTarget();
       if (target === undefined) return;
       applyAndNotify("claude", target);
-    }
+    },
   );
   const applyWorkflowCopilot = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowCopilot",
-    () => applyAndNotify("copilot")
+    () => applyAndNotify("copilot"),
   );
   const applyWorkflowCodex = vscode.commands.registerCommand(
     "plan-code-review-workflow.applyWorkflowCodex",
-    () => applyAndNotify("codex")
+    async () => {
+      const target = await pickCodexInstallTarget();
+      if (target === undefined) return;
+      applyAndNotify("codex", undefined, undefined, target);
+    },
   );
 
   const installCodexSkillsCmd = vscode.commands.registerCommand(
     "plan-code-review-workflow.installCodexSkills",
     () => {
-      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const workspaceRootPath =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
       const result = installCodexSkills(workspaceRootPath, basePath);
       if (result.success) {
-        const detail = result.details?.length ? "\n" + result.details.join("\n") : "";
-        vscode.window.showInformationMessage(result.message + detail, { modal: false });
+        const detail = result.details?.length
+          ? "\n" + result.details.join("\n")
+          : "";
+        vscode.window.showInformationMessage(result.message + detail, {
+          modal: false,
+        });
       } else {
         vscode.window.showErrorMessage(result.message);
       }
-    }
+    },
   );
 
   const removeWorkflowAllCmd = vscode.commands.registerCommand(
@@ -230,27 +288,37 @@ export function activate(context: vscode.ExtensionContext): void {
       const confirm = await vscode.window.showWarningMessage(
         "Remove only the workflow items that this extension added (recorded in the manifest). Other commands/skills/rules will not be touched. Continue?",
         { modal: true },
-        "Remove extension workflow only"
+        "Remove extension workflow only",
       );
       if (confirm !== "Remove extension workflow only") return;
-      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-      const result = await removeWorkflowAll({ extensionPath: basePath, workspaceRootPath });
+      const workspaceRootPath =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const result = await removeWorkflowAll({
+        extensionPath: basePath,
+        workspaceRootPath,
+      });
       if (result.success) {
-        const detail = result.details?.length ? "\n" + result.details.join("\n") : "";
-        vscode.window.showInformationMessage(result.message + detail, { modal: false });
+        const detail = result.details?.length
+          ? "\n" + result.details.join("\n")
+          : "";
+        vscode.window.showInformationMessage(result.message + detail, {
+          modal: false,
+        });
       } else {
         vscode.window.showErrorMessage(result.message);
       }
-    }
+    },
   );
 
   const showAppliedWorkflowLogCmd = vscode.commands.registerCommand(
     "plan-code-review-workflow.showAppliedWorkflowLog",
     () => {
-      const workspaceRootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-      const { summary, workspace, user } = getAppliedWorkflowLog(workspaceRootPath);
+      const workspaceRootPath =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+      const { summary, workspace, user } =
+        getAppliedWorkflowLog(workspaceRootPath);
       const lines: string[] = [
-        "Plan-Code-Review Workflow — Applied items (only these are removed by \"Remove workflow from all\")",
+        'Plan-Code-Review Workflow — Applied items (only these are removed by "Remove workflow from all")',
         "",
         ...summary,
       ];
@@ -261,10 +329,12 @@ export function activate(context: vscode.ExtensionContext): void {
         lines.push(user ? JSON.stringify(user, null, 2) : "(none)");
       }
       const content = lines.join("\n");
-      vscode.workspace.openTextDocument({ content, language: "plaintext" }).then((document) => {
-        vscode.window.showTextDocument(document, { preview: false });
-      });
-    }
+      vscode.workspace
+        .openTextDocument({ content, language: "plaintext" })
+        .then((document) => {
+          vscode.window.showTextDocument(document, { preview: false });
+        });
+    },
   );
 
   context.subscriptions.push(
@@ -279,7 +349,7 @@ export function activate(context: vscode.ExtensionContext): void {
     applyWorkflowCodex,
     installCodexSkillsCmd,
     removeWorkflowAllCmd,
-    showAppliedWorkflowLogCmd
+    showAppliedWorkflowLogCmd,
   );
 }
 

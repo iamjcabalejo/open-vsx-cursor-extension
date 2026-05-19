@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.2.0] - 2026-05-19
+
+### Added
+
+- **Token policy (all assistants)**: Canonical `token-policy` rules for Cursor (`.cursor/rules/token-policy.mdc`), Claude (`.claude/rules/token-policy.md`), Codex (`~/.codex/rules/token-policy.md` or project `AGENTS.md`), and Copilot (`token-policy.instructions.md` with `applyTo: **`). Compounding dev cycle, core standards, commands, skills, and agents reference the policy instead of duplicating inline text.
+- **Codex install target**: When applying the Codex workflow, you can choose **project root** (`AGENTS.md` in workspace) or **user directory** (`~/.codex/` with `AGENTS.md`, `rules/`, and `skills/`), matching Cursor and Claude Code.
+
+### Changed
+
+- **README / DEV-GUIDE**: Documented token policy and Codex project vs user install paths.
+
 ## [4.2.0] - 2026-03-01
 
 ### Added

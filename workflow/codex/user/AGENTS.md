@@ -8,20 +8,15 @@ Apply the compounding dev cycle in every project. Project-level AGENTS.md adds r
 
 Follow **Plan → Code → Review/Test → Plan** for every feature or change. Each phase produces handoff artifacts so the next agent can continue without loss of context. **Switch modes explicitly** as you progress through phases; each mode has distinct responsibilities and output expectations.
 
-## Token-efficient response policy (always on)
+## Token policy (always on)
 
-Apply token-efficient mode by default for all Codex user-level workflows.
+Apply **`~/.codex/rules/token-policy.md`** (or project AGENTS.md token-policy section) in every session: refine → hand off, concise but complete responses, lean diffs, internal XML blueprints for complex work.
 
-- **Default intensity:** `full`
-- **Supported levels:** `lite`, `full`, `ultra`
-- **Rule:** concise but complete; do not omit required command/review structures.
-- **Auto-clarity override:** use explicit full-language warnings for destructive actions, security-sensitive instructions, irreversible outcomes, or ambiguity-prone multi-step steps.
+---
 
-### RiskControls
-- **R-1 Clarity regression:** enforce auto-clarity override and no-ambiguity wording for high-risk guidance.
-- **R-2 Cross-ecosystem drift:** keep policy semantics aligned with Cursor/Copilot/Claude docs.
-- **R-3 Format conflicts:** mandatory output sections are immutable; only surrounding prose is compressed.
-- **R-4 Level inconsistency:** keep `lite/full/ultra` definitions/examples consistent in skills/commands/agents.
+## Before mode switching: refine, then hand off
+
+Every feature cycle starts from a user prompt. **First** apply token-policy **Session entry flow** (**refine** the ask → **hand off** a compact spec). **Then** enter **ASK** / **PLAN** or delegate with that refined handoff, not a vague restatement.
 
 ---
 
@@ -40,7 +35,7 @@ Each mode has distinct responsibilities and output expectations.
 ### PLAN mode (Phase 1b: Plan authoring)
 
 - **Entry:** After ASK completes (or when scope is already clear); begin authoring the plan artifact.
-- **Behavior:** Write scope, acceptance criteria, technical approach, and task list; reference project rules.
+- **Behavior:** Write scope, acceptance criteria, technical approach, and task list; reference project rules (including token-policy for lean plan prose).
 - **Output:** Single written plan document (e.g. `docs/plans/<feature>.md` or ticket with complete AC).
 - **Exit:** When another agent can implement from the plan without guessing.
 
@@ -48,7 +43,7 @@ Each mode has distinct responsibilities and output expectations.
 
 - **Entry:** After PLAN artifact is handed off.
 - **Behavior:** Implement code (Phase 2), write tests, produce implementation notes; OR review/test and produce rework list (Phase 3).
-- **Output:** Code changes + tests + implementation notes (Phase 2); OR review summary + rework list (Phase 3).
+- **Output:** Code changes + tests + implementation notes (Phase 2); OR review summary + rework list (Phase 3). Prose is **lean**; follow token-policy (no filler, minimal handoff).
 - **Exit/Loop:** If Critical rework items → new cycle (back to ASK or PLAN for rework scope); if no Critical issues → production ready.
 
 ---
@@ -90,6 +85,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
 
 **Outputs (handoff to Code):**
+
 - **Scope:** What is in/out; dependencies and boundaries.
 - **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
 - **Technical approach:** Key components, APIs, data shapes; references to existing rules (e.g. AGENTS.md).
@@ -110,6 +106,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan artifact, project rules (in AGENTS.md), existing code.
 
 **Outputs (handoff to Review/Test):**
+
 - **Implementation:** Code that satisfies acceptance criteria and project standards.
 - **Tests:** Unit/integration/API tests for new behavior.
 - **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes.
@@ -129,6 +126,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
 
 **Outputs (handoff to Plan or Code):**
+
 - **Review summary:** Alignment with plan, adherence to project rules, security and performance notes.
 - **Test status:** Which acceptance criteria are covered; any failing or missing tests.
 - **Rework list:** Concrete, actionable items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**.
@@ -153,11 +151,12 @@ Each mode has distinct responsibilities and output expectations.
 
 ## Cross-phase standards
 
-- **Consistency:** All phases respect project rules in AGENTS.md.
+- **Token budget:** token-policy applies to **all phases** (ASK/PLAN/AGENT): concise answers, no filler, lean diffs, XML blueprints when complex or high-stakes.
+- **Consistency:** All phases respect project rules in AGENTS.md; they are **additive** with token-policy.
 - **Traceability:** Link code and review back to the plan (e.g. "implements AC-1, AC-2" in commits or PR description).
 - **Single source of truth:** The plan doc is the contract; change it when scope or criteria change, then proceed.
 - **Smooth handoff:** Each phase ends with written artifacts the next phase needs; avoid "verbal" handoffs only.
 
 ---
 
-*User-level rules from Plan-Code-Review Workflow extension.*
+_User-level rules from Plan-Code-Review Workflow extension._

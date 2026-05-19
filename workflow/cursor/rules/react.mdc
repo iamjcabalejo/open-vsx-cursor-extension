@@ -6,6 +6,8 @@ alwaysApply: false
 
 # React
 
+*Also applies:* `token-policy.mdc` (answer shape, diffs, tools). This file is stack-only; both apply.
+
 ## Component Structure
 - Use functional components and hooks; avoid class components for new code
 - Keep components under ~100 lines; extract subcomponents or custom hooks when larger

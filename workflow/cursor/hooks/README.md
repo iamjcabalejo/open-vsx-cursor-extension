@@ -20,18 +20,18 @@ Without hooks, you'd have to manually run formatters, remember to avoid risky co
 
 ## When to Use Each Hook
 
-| Hook | When it runs | Use it for |
-|------|--------------|------------|
-| `sessionStart` | New composer session opens | Inject env vars, add context, block session if policy violated |
-| `sessionEnd` | Session closes | Log duration, send analytics, cleanup |
-| `beforeSubmitPrompt` | User hits send, before request | Scan prompt for secrets/PII, block if policy violated |
-| `beforeShellExecution` | Before any shell command runs | Approve/deny commands, log, block risky ops (rm, network) |
-| `afterShellExecution` | After shell command completes | Log output, run post-command checks |
-| `beforeMCPExecution` | Before MCP tool runs | Gate MCP access, log tool usage |
-| `afterMCPExecution` | After MCP tool completes | Audit MCP results |
-| `beforeReadFile` | Before agent reads a file | Block sensitive files, redact content |
-| `afterFileEdit` | After agent edits a file | Run formatter, linter, or custom checks |
-| `stop` | When agent loop ends | Log completion, optionally auto-submit follow-up message |
+| Hook                   | When it runs                   | Use it for                                                     |
+| ---------------------- | ------------------------------ | -------------------------------------------------------------- |
+| `sessionStart`         | New composer session opens     | Inject env vars, add context, block session if policy violated |
+| `sessionEnd`           | Session closes                 | Log duration, send analytics, cleanup                          |
+| `beforeSubmitPrompt`   | User hits send, before request | Scan prompt for secrets/PII, block if policy violated          |
+| `beforeShellExecution` | Before any shell command runs  | Approve/deny commands, log, block risky ops (rm, network)      |
+| `afterShellExecution`  | After shell command completes  | Log output, run post-command checks                            |
+| `beforeMCPExecution`   | Before MCP tool runs           | Gate MCP access, log tool usage                                |
+| `afterMCPExecution`    | After MCP tool completes       | Audit MCP results                                              |
+| `beforeReadFile`       | Before agent reads a file      | Block sensitive files, redact content                          |
+| `afterFileEdit`        | After agent edits a file       | Run formatter, linter, or custom checks                        |
+| `stop`                 | When agent loop ends           | Log completion, optionally auto-submit follow-up message       |
 
 ---
 
@@ -48,9 +48,7 @@ Without hooks, you'd have to manually run formatters, remember to avoid risky co
 {
   "version": 1,
   "hooks": {
-    "afterFileEdit": [
-      {"command": ".cursor/hooks/format.sh", "timeout": 10}
-    ]
+    "afterFileEdit": [{ "command": ".cursor/hooks/format.sh", "timeout": 10 }]
   }
 }
 ```
@@ -92,9 +90,9 @@ Create `block-risky.sh` that reads the command from stdin, checks against a bloc
 ```json
 {
   "hooks": {
-    "beforeShellExecution": [{"command": ".cursor/hooks/audit.sh"}],
-    "afterFileEdit": [{"command": ".cursor/hooks/audit.sh"}],
-    "stop": [{"command": ".cursor/hooks/audit.sh"}]
+    "beforeShellExecution": [{ "command": ".cursor/hooks/audit.sh" }],
+    "afterFileEdit": [{ "command": ".cursor/hooks/audit.sh" }],
+    "stop": [{ "command": ".cursor/hooks/audit.sh" }]
   }
 }
 ```
@@ -113,7 +111,7 @@ Create `block-risky.sh` that reads the command from stdin, checks against a bloc
 {
   "hooks": {
     "sessionStart": [
-      {"command": ".cursor/hooks/session-init.sh", "timeout": 5}
+      { "command": ".cursor/hooks/session-init.sh", "timeout": 5 }
     ]
   }
 }
@@ -172,24 +170,26 @@ The hook can return `{"permission":"ask"}` to prompt the user, or `{"permission"
 
 ## Available Scripts (Included)
 
-| Script | Events | Purpose |
-|--------|--------|---------|
-| `format.sh` | afterFileEdit | Runs Prettier on edited files (if available) |
-| `audit.sh` | beforeShellExecution, afterShellExecution, sessionEnd, stop | Logs events to `.cursor/hooks/audit.log` |
-| `session-init.sh` | sessionStart | Session setup (inject env, context, or block) |
+| Script            | Events                                                      | Purpose                                       |
+| ----------------- | ----------------------------------------------------------- | --------------------------------------------- |
+| `format.sh`       | afterFileEdit                                               | Runs Prettier on edited files (if available)  |
+| `audit.sh`        | beforeShellExecution, afterShellExecution, sessionEnd, stop | Logs events to `.cursor/hooks/audit.log`      |
+| `session-init.sh` | sessionStart                                                | Session setup (inject env, context, or block) |
 
 ---
 
-## Alignment with Compounding Development Cycle
+## Alignment with workflow rules
+
+Hooks align with **`token-policy.mdc`**, **`compounding-dev-cycle.mdc`**, and **`core-standards.mdc`** (lean side effects, no secret logging).
 
 This project follows **Plan → Code → Review/Test → Plan** (see `.cursor/rules/compounding-dev-cycle.mdc`). Hooks are configured to support that cycle:
 
-| Hook / script | How it supports the cycle |
-|---------------|---------------------------|
-| **sessionStart** → `session-init.sh` | Injects reminder context so agents follow the cycle: plan first (feature-plan), code to the plan, hand off with implementation notes; plan doc is the single source of truth. |
-| **afterFileEdit** → `format.sh` | Keeps Code-phase output consistent with `core-standards.mdc` (style, formatting) so Review/Test sees clean diffs. |
-| **sessionEnd** → `audit.sh` | Logs session end in `audit.log` so session boundaries are visible; supports traceability and handoff between sessions. |
-| **beforeShellExecution** / **afterShellExecution** / **stop** → `audit.sh` | Logs commands (before/after) and loop end to `audit.log` for traceability (what ran, when), supporting handoff and rework follow-up. |
+| Hook / script                                                              | How it supports the cycle                                                                                                                                            |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **sessionStart** → `session-init.sh`                                       | Injects reminder context: refine → hand off (`token-policy`), then plan first (feature-plan), code to the plan, review loop; plan doc is the single source of truth. |
+| **afterFileEdit** → `format.sh`                                            | Keeps Code-phase output consistent with `core-standards.mdc` (style, formatting) so Review/Test sees clean diffs.                                                    |
+| **sessionEnd** → `audit.sh`                                                | Logs session end in `audit.log` so session boundaries are visible; supports traceability and handoff between sessions.                                               |
+| **beforeShellExecution** / **afterShellExecution** / **stop** → `audit.sh` | Logs commands (before/after) and loop end to `audit.log` for traceability (what ran, when), supporting handoff and rework follow-up.                                 |
 
 No hooks run automatically for Review/Test or for creating plan docs—those are driven by commands (e.g. feature-plan, project-manager) and agents (backend-reviewer, frontend-reviewer). E2E is user-triggered.
 

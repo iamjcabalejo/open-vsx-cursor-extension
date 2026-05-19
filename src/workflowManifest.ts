@@ -50,27 +50,45 @@ function workspaceManifestPath(workspaceRootPath: string): string {
 }
 
 /** Read workspace manifest. Returns null if no workspace or file missing. */
-export function getWorkspaceManifest(workspaceRootPath: string | undefined): WorkspaceManifest | null {
+export function getWorkspaceManifest(
+  workspaceRootPath: string | undefined,
+): WorkspaceManifest | null {
   if (!workspaceRootPath) return null;
   const p = workspaceManifestPath(workspaceRootPath);
   if (!fs.existsSync(p)) return null;
-  const data = readJsonSafe<WorkspaceManifest>(p, null as unknown as WorkspaceManifest);
-  if (!data || data.version !== MANIFEST_VERSION || data.extensionId !== EXTENSION_ID) return null;
+  const data = readJsonSafe<WorkspaceManifest>(
+    p,
+    null as unknown as WorkspaceManifest,
+  );
+  if (
+    !data ||
+    data.version !== MANIFEST_VERSION ||
+    data.extensionId !== EXTENSION_ID
+  )
+    return null;
   return data;
 }
 
 /** Read user manifest. */
 export function getUserManifest(): UserManifest | null {
   if (!fs.existsSync(USER_MANIFEST_PATH)) return null;
-  const data = readJsonSafe<UserManifest>(USER_MANIFEST_PATH, null as unknown as UserManifest);
-  if (!data || data.version !== MANIFEST_VERSION || data.extensionId !== EXTENSION_ID) return null;
+  const data = readJsonSafe<UserManifest>(
+    USER_MANIFEST_PATH,
+    null as unknown as UserManifest,
+  );
+  if (
+    !data ||
+    data.version !== MANIFEST_VERSION ||
+    data.extensionId !== EXTENSION_ID
+  )
+    return null;
   return data;
 }
 
 /** Merge and write workspace manifest. */
 export function recordWorkspaceApplied(
   workspaceRootPath: string,
-  update: Partial<Omit<WorkspaceManifest, "version" | "extensionId">>
+  update: Partial<Omit<WorkspaceManifest, "version" | "extensionId">>,
 ): void {
   const p = workspaceManifestPath(workspaceRootPath);
   const existing: WorkspaceManifest = readJsonSafe(p, {
@@ -88,7 +106,7 @@ export function recordWorkspaceApplied(
 
 /** Merge and write user manifest. */
 export function recordUserApplied(
-  update: Partial<Omit<UserManifest, "version" | "extensionId">>
+  update: Partial<Omit<UserManifest, "version" | "extensionId">>,
 ): void {
   const existing: UserManifest = readJsonSafe(USER_MANIFEST_PATH, {
     version: MANIFEST_VERSION,
@@ -102,13 +120,17 @@ export function recordUserApplied(
   };
   const dir = path.dirname(USER_MANIFEST_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(USER_MANIFEST_PATH, JSON.stringify(merged, null, 2), "utf-8");
+  fs.writeFileSync(
+    USER_MANIFEST_PATH,
+    JSON.stringify(merged, null, 2),
+    "utf-8",
+  );
 }
 
 /** Clear workspace manifest entries and delete file if empty. */
 export function clearWorkspaceManifest(
   workspaceRootPath: string,
-  keys: (keyof Omit<WorkspaceManifest, "version" | "extensionId">)[]
+  keys: (keyof Omit<WorkspaceManifest, "version" | "extensionId">)[],
 ): void {
   const p = workspaceManifestPath(workspaceRootPath);
   const current = getWorkspaceManifest(workspaceRootPath);
@@ -127,7 +149,7 @@ export function clearWorkspaceManifest(
 
 /** Clear user manifest entries and delete file if empty. */
 export function clearUserManifest(
-  keys: (keyof Omit<UserManifest, "version" | "extensionId">)[]
+  keys: (keyof Omit<UserManifest, "version" | "extensionId">)[],
 ): void {
   const current = getUserManifest();
   if (!current) return;
@@ -139,52 +161,77 @@ export function clearUserManifest(
   if (Object.keys(rest).length === 0) {
     if (fs.existsSync(USER_MANIFEST_PATH)) fs.unlinkSync(USER_MANIFEST_PATH);
   } else {
-    fs.writeFileSync(USER_MANIFEST_PATH, JSON.stringify(next, null, 2), "utf-8");
+    fs.writeFileSync(
+      USER_MANIFEST_PATH,
+      JSON.stringify(next, null, 2),
+      "utf-8",
+    );
   }
 }
 
 /** Return a human-readable log of all applied workflow (workspace + user). */
-export function getAppliedWorkflowLog(
-  workspaceRootPath: string | undefined
-): { workspace: WorkspaceManifest | null; user: UserManifest | null; summary: string[] } {
-  const workspace = workspaceRootPath ? getWorkspaceManifest(workspaceRootPath) : null;
+export function getAppliedWorkflowLog(workspaceRootPath: string | undefined): {
+  workspace: WorkspaceManifest | null;
+  user: UserManifest | null;
+  summary: string[];
+} {
+  const workspace = workspaceRootPath
+    ? getWorkspaceManifest(workspaceRootPath)
+    : null;
   const user = getUserManifest();
   const summary: string[] = [];
 
   if (workspace) {
     if (workspace.cursor) {
-      summary.push(`[Workspace] Cursor: .cursor, .cursor-plugin (applied ${workspace.cursor.appliedAt})`);
+      summary.push(
+        `[Workspace] Cursor: .cursor, .cursor-plugin (applied ${workspace.cursor.appliedAt})`,
+      );
     }
     if (workspace.claude) {
-      summary.push(`[Workspace] Claude: .claude, CLAUDE.md (applied ${workspace.claude.appliedAt})`);
+      summary.push(
+        `[Workspace] Claude: .claude, CLAUDE.md (applied ${workspace.claude.appliedAt})`,
+      );
     }
     if (workspace.copilot?.files?.length) {
       summary.push(
-        `[Workspace] Copilot: ${workspace.copilot.files.join(", ")} (applied ${workspace.copilot.appliedAt})`
+        `[Workspace] Copilot: ${workspace.copilot.files.join(", ")} (applied ${workspace.copilot.appliedAt})`,
       );
     }
     if (workspace.codex) {
-      summary.push(`[Workspace] Codex: AGENTS.md (applied ${workspace.codex.appliedAt})`);
+      summary.push(
+        `[Workspace] Codex: AGENTS.md (applied ${workspace.codex.appliedAt})`,
+      );
     }
   }
 
   if (user) {
     if (user.cursor) {
-      summary.push(`[User] Cursor: ~/.cursor, ~/.cursor-plugin (applied ${user.cursor.appliedAt})`);
+      summary.push(
+        `[User] Cursor: ~/.cursor, ~/.cursor-plugin (applied ${user.cursor.appliedAt})`,
+      );
     }
     if (user.claude) {
-      summary.push(`[User] Claude: ~/.claude (applied ${user.claude.appliedAt})`);
+      summary.push(
+        `[User] Claude: ~/.claude (applied ${user.claude.appliedAt})`,
+      );
     }
     if (user.copilot?.promptPaths?.length) {
       summary.push(
-        `[User] Copilot: ${user.copilot.promptPaths.length} prompt file(s) (applied ${user.copilot.appliedAt})`
+        `[User] Copilot: ${user.copilot.promptPaths.length} prompt file(s) (applied ${user.copilot.appliedAt})`,
       );
     }
     if (user.codex) {
       const parts: string[] = [];
-      if (user.codex.skills?.length) parts.push(`skills: ${user.codex.skills.length}`);
-      if (user.codex.userAgents) parts.push("~/.codex/AGENTS.md");
-      if (parts.length) summary.push(`[User] Codex: ${parts.join(", ")} (applied ${user.codex.appliedAt})`);
+      if (user.codex.skills?.length)
+        parts.push(`skills: ${user.codex.skills.length}`);
+      if (user.codex.userAgents) {
+        parts.push("~/.codex/AGENTS.md");
+        parts.push("~/.codex/rules/");
+      }
+      if (parts.length)
+        summary.push(
+          `[User] Codex: ${parts.join(", ")} (applied ${user.codex.appliedAt})`,
+        );
     }
   }
 

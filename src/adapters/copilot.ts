@@ -19,7 +19,7 @@ const SKIP_DIRS = new Set([".git", "node_modules", ".vscode-test"]);
 function copyDirRecursive(
   srcDir: string,
   destDir: string,
-  relPrefix: string
+  relPrefix: string,
 ): string[] {
   const written: string[] = [];
   if (!fs.existsSync(srcDir)) return written;
@@ -45,10 +45,29 @@ function getUserPromptsDirs(): string[] {
   const home = os.homedir();
   const dirs: string[] = [];
   if (process.platform === "darwin") {
-    dirs.push(path.join(home, "Library", "Application Support", "Code", "User", "prompts"));
-    dirs.push(path.join(home, "Library", "Application Support", "Cursor", "User", "prompts"));
+    dirs.push(
+      path.join(
+        home,
+        "Library",
+        "Application Support",
+        "Code",
+        "User",
+        "prompts",
+      ),
+    );
+    dirs.push(
+      path.join(
+        home,
+        "Library",
+        "Application Support",
+        "Cursor",
+        "User",
+        "prompts",
+      ),
+    );
   } else if (process.platform === "win32") {
-    const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
+    const appData =
+      process.env.APPDATA || path.join(home, "AppData", "Roaming");
     dirs.push(path.join(appData, "Code", "User", "prompts"));
     dirs.push(path.join(appData, "Cursor", "User", "prompts"));
   } else {
@@ -61,12 +80,15 @@ function getUserPromptsDirs(): string[] {
 /**
  * Apply workflow for GitHub Copilot: copy from workflow/copilot to .github/ and root AGENTS.md; user-level from copilot/user-instructions.md.
  */
-export async function applyCopilot(context: AdapterContext): Promise<ApplyResult> {
+export async function applyCopilot(
+  context: AdapterContext,
+): Promise<ApplyResult> {
   const { extensionPath, workspaceRootPath } = context;
   if (!workspaceRootPath) {
     return {
       success: false,
-      message: "No workspace folder open. Open a folder first, then run the command again.",
+      message:
+        "No workspace folder open. Open a folder first, then run the command again.",
     };
   }
 
@@ -86,7 +108,10 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
     const githubDir = path.join(workspaceRootPath, ".github");
     if (!fs.existsSync(githubDir)) fs.mkdirSync(githubDir, { recursive: true });
 
-    const copilotInstructionsSrc = path.join(copilotSrc, "copilot-instructions.md");
+    const copilotInstructionsSrc = path.join(
+      copilotSrc,
+      "copilot-instructions.md",
+    );
     if (fs.existsSync(copilotInstructionsSrc)) {
       const dest = path.join(githubDir, "copilot-instructions.md");
       fs.copyFileSync(copilotInstructionsSrc, dest);
@@ -97,33 +122,64 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
     const instructionsSrc = path.join(copilotSrc, "instructions");
     if (fs.existsSync(instructionsSrc)) {
       const instructionsDest = path.join(githubDir, "instructions");
-      const relPaths = copyDirRecursive(instructionsSrc, instructionsDest, ".github/instructions");
+      const relPaths = copyDirRecursive(
+        instructionsSrc,
+        instructionsDest,
+        ".github/instructions",
+      );
       copilotFiles.push(...relPaths);
-      if (relPaths.length > 0) details.push(".github/instructions/ (compounding-dev-cycle.instructions.md)");
+      if (relPaths.length > 0) {
+        details.push(
+          ".github/instructions/ (token-policy + compounding-dev-cycle.instructions.md)",
+        );
+      }
     }
 
     const agentsSrc = path.join(copilotSrc, "agents");
     if (fs.existsSync(agentsSrc)) {
       const agentsDest = path.join(githubDir, "agents");
-      const relPaths = copyDirRecursive(agentsSrc, agentsDest, ".github/agents");
+      const relPaths = copyDirRecursive(
+        agentsSrc,
+        agentsDest,
+        ".github/agents",
+      );
       copilotFiles.push(...relPaths);
-      if (relPaths.length > 0) details.push(".github/agents/ (" + relPaths.length + " agent(s) as <name>.agent.md)");
+      if (relPaths.length > 0)
+        details.push(
+          ".github/agents/ (" +
+            relPaths.length +
+            " agent(s) as <name>.agent.md)",
+        );
     }
 
     const workflowsSrc = path.join(copilotSrc, "workflows");
     if (fs.existsSync(workflowsSrc)) {
       const workflowsDest = path.join(githubDir, "workflows");
-      const relPaths = copyDirRecursive(workflowsSrc, workflowsDest, ".github/workflows");
+      const relPaths = copyDirRecursive(
+        workflowsSrc,
+        workflowsDest,
+        ".github/workflows",
+      );
       copilotFiles.push(...relPaths);
-      if (relPaths.length > 0) details.push(".github/workflows/ (hooks.json, README, scripts)");
+      if (relPaths.length > 0)
+        details.push(".github/workflows/ (hooks.json, README, scripts)");
     }
 
     const issueTemplateSrc = path.join(copilotSrc, "ISSUE_TEMPLATE");
     if (fs.existsSync(issueTemplateSrc)) {
       const templateDest = path.join(githubDir, "ISSUE_TEMPLATE");
-      const relPaths = copyDirRecursive(issueTemplateSrc, templateDest, ".github/ISSUE_TEMPLATE");
+      const relPaths = copyDirRecursive(
+        issueTemplateSrc,
+        templateDest,
+        ".github/ISSUE_TEMPLATE",
+      );
       copilotFiles.push(...relPaths);
-      if (relPaths.length > 0) details.push(".github/ISSUE_TEMPLATE/ (" + relPaths.length + " structured prompt(s))");
+      if (relPaths.length > 0)
+        details.push(
+          ".github/ISSUE_TEMPLATE/ (" +
+            relPaths.length +
+            " structured prompt(s))",
+        );
     }
 
     const agentsMdSrc = path.join(copilotSrc, "AGENTS.md");
@@ -131,7 +187,9 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
       const agentsMdDest = path.join(workspaceRootPath, "AGENTS.md");
       fs.copyFileSync(agentsMdSrc, agentsMdDest);
       copilotFiles.push("AGENTS.md");
-      details.push("AGENTS.md (compounding dev cycle + custom agents in .github/agents/)");
+      details.push(
+        "AGENTS.md (compounding dev cycle + custom agents in .github/agents/)",
+      );
     }
 
     const userInstructionsSrc = path.join(copilotSrc, "user-instructions.md");
@@ -150,7 +208,8 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
       ].join("\n");
       for (const promptsDir of getUserPromptsDirs()) {
         try {
-          if (!fs.existsSync(promptsDir)) fs.mkdirSync(promptsDir, { recursive: true });
+          if (!fs.existsSync(promptsDir))
+            fs.mkdirSync(promptsDir, { recursive: true });
           const filePath = path.join(promptsDir, INSTRUCTIONS_FILE_NAME);
           fs.writeFileSync(filePath, instructionsContent, "utf-8");
           writtenPromptPaths.push(filePath);
@@ -159,16 +218,19 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
           console.warn(
             "Copilot adapter: skip prompts dir (unwritable or not used by this IDE)",
             promptsDir,
-            err instanceof Error ? err.message : String(err)
+            err instanceof Error ? err.message : String(err),
           );
         }
       }
       if (userLevelWritten > 0) {
         recordUserApplied({
-          copilot: { promptPaths: writtenPromptPaths, appliedAt: new Date().toISOString() },
+          copilot: {
+            promptPaths: writtenPromptPaths,
+            appliedAt: new Date().toISOString(),
+          },
         });
         details.push(
-          `User-level: rules, agents, skills in prompts folder (${userLevelWritten} location(s))`
+          `User-level: rules, agents, skills in prompts folder (${userLevelWritten} location(s))`,
         );
       }
     }
@@ -196,7 +258,9 @@ export async function applyCopilot(context: AdapterContext): Promise<ApplyResult
 /**
  * Remove GitHub Copilot workflow only from paths recorded in the manifest (extension-added only).
  */
-export async function removeCopilot(context: AdapterContext): Promise<RemoveResult> {
+export async function removeCopilot(
+  context: AdapterContext,
+): Promise<RemoveResult> {
   const { workspaceRootPath } = context;
   const details: string[] = [];
   const errors: string[] = [];
@@ -232,10 +296,27 @@ export async function removeCopilot(context: AdapterContext): Promise<RemoveResu
       }
     }
     const githubAgentsDir = path.join(workspaceRootPath, ".github", "agents");
-    const githubWorkflowsDir = path.join(workspaceRootPath, ".github", "workflows");
-    const githubInstructionsDir = path.join(workspaceRootPath, ".github", "instructions");
-    const githubIssueTemplateDir = path.join(workspaceRootPath, ".github", "ISSUE_TEMPLATE");
-    for (const dir of [githubAgentsDir, githubWorkflowsDir, githubInstructionsDir, githubIssueTemplateDir]) {
+    const githubWorkflowsDir = path.join(
+      workspaceRootPath,
+      ".github",
+      "workflows",
+    );
+    const githubInstructionsDir = path.join(
+      workspaceRootPath,
+      ".github",
+      "instructions",
+    );
+    const githubIssueTemplateDir = path.join(
+      workspaceRootPath,
+      ".github",
+      "ISSUE_TEMPLATE",
+    );
+    for (const dir of [
+      githubAgentsDir,
+      githubWorkflowsDir,
+      githubInstructionsDir,
+      githubIssueTemplateDir,
+    ]) {
       if (fs.existsSync(dir)) {
         try {
           const remaining = fs.readdirSync(dir);
@@ -255,7 +336,8 @@ export async function removeCopilot(context: AdapterContext): Promise<RemoveResu
   if (errors.length > 0) {
     return {
       success: false,
-      message: "Failed to remove some Copilot workflow files: " + errors.join("; "),
+      message:
+        "Failed to remove some Copilot workflow files: " + errors.join("; "),
       details,
     };
   }

@@ -8,40 +8,9 @@ Follow **Plan → Code → Review/Test → Plan** for every feature or change. E
 
 ---
 
-## TokenPolicy (always on)
+## Before mode switching: refine, then hand off
 
-Use token-efficient communication in every phase and output unless an auto-clarity override applies.
-
-### Defaults
-- **Activation:** Always on for all skills, commands, and agents that inherit this rule.
-- **Baseline behavior:** concise but complete; preserve required sections, safety notes, and acceptance criteria.
-- **Canonical terms:** `token-efficient mode`, `intensity level`, `auto-clarity override`.
-
-### Intensity levels
-- **lite:** Full sentences, minimal filler, compact wording.
-- **full (default):** Aggressively concise phrasing; remove non-essential prose while keeping all technical meaning.
-- **ultra:** Maximum compression for low-risk contexts; short fragments allowed, but required structure must remain intact.
-
-### Auto-clarity override (required)
-Temporarily switch to explicit, uncompressed language for:
-- destructive or irreversible actions
-- security warnings and sensitive operations
-- multi-step instructions where compression could cause mistakes
-- legal/compliance or data-integrity warnings
-
-After the clear warning/instruction, return to the selected intensity level.
-
-### No ambiguous compression guardrail
-Never compress away:
-- preconditions required for safe execution
-- explicit warnings about irreversible outcomes
-- required checklist items in plan/review outputs
-
-### RiskControls
-- **R-1 Clarity regression:** Use auto-clarity override + forbidden ambiguity guardrail.
-- **R-2 Policy drift:** Keep a canonical TokenPolicy block aligned across Cursor/Copilot/Claude docs.
-- **R-3 Format conflicts:** Preserve mandatory output schemas first, then compress wording.
-- **R-4 Level inconsistency:** Keep shared level definitions (`lite/full/ultra`) and examples aligned in skills/agents/commands.
+Every feature cycle starts from a user prompt. **First** apply **`.github/instructions/token-policy.instructions.md`** **Session entry flow** (**refine** the ask → **hand off** a compact spec). **Then** enter **ASK** / **PLAN** or delegate to **agents** with that refined handoff, not a vague restatement. That preserves context for implementation and review in product repos.
 
 ---
 
@@ -60,7 +29,7 @@ Each mode has distinct responsibilities and output expectations.
 ### PLAN mode (Phase 1b: Plan authoring)
 
 - **Entry:** After ASK completes (or when scope is already clear); begin authoring the plan artifact.
-- **Behavior:** Write scope, acceptance criteria, technical approach, and task list; reference project rules.
+- **Behavior:** Write scope, acceptance criteria, technical approach, and task list; reference project rules (including token-policy for lean plan prose when the agent authors the plan).
 - **Output:** Single written plan document (e.g. `docs/plans/<feature>.md` or ticket with complete AC).
 - **Exit:** When another agent can implement from the plan without guessing.
 
@@ -68,7 +37,7 @@ Each mode has distinct responsibilities and output expectations.
 
 - **Entry:** After PLAN artifact is handed off.
 - **Behavior:** Implement code (Phase 2), write tests, produce implementation notes; OR review/test and produce rework list (Phase 3).
-- **Output:** Code changes + tests + implementation notes (Phase 2); OR review summary + rework list (Phase 3).
+- **Output:** Code changes + tests + implementation notes (Phase 2); OR review summary + rework list (Phase 3). Prose in each phase is **lean**; follow token-policy (no filler, minimal handoff).
 - **Exit/Loop:** If Critical rework items → new cycle (back to ASK or PLAN for rework scope); if no Critical issues → production ready.
 
 ---
@@ -110,6 +79,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
 
 **Outputs (handoff to Code):**
+
 - **Scope:** What is in/out; dependencies and boundaries.
 - **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
 - **Technical approach:** Key components, APIs, data shapes; references to existing rules (e.g. `core-standards.md`, `api-routes.md`).
@@ -132,9 +102,10 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan artifact, project rules (core-standards, api-routes, typescript, react, e2e-tests), existing code.
 
 **Outputs (handoff to Review/Test):**
+
 - **Implementation:** Code that satisfies acceptance criteria and project standards.
 - **Tests:** Unit/integration/API tests for new behavior; follow `api-test` / E2E patterns where relevant.
-- **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes. Use this minimal template for consistency:
+- **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes—**shape and length follow token-policy**. Use this minimal template for consistency:
   - **Done:** What was implemented (and which AC it maps to, if applicable).
   - **Deferred:** What was explicitly postponed with a brief reason.
   - **Assumptions:** Any assumptions about environment, dependencies, or behavior.
@@ -157,7 +128,8 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
 
 **Outputs (handoff to Plan or Code):**
-- **Review summary:** Alignment with plan, adherence to core-standards and api-routes, security and performance notes.
+
+- **Review summary:** Alignment with plan, adherence to core-standards and api-routes, security and performance notes. Keep it **tight and scannable** (token-policy—smallest text that still enables a fix).
 - **Test status:** Which acceptance criteria are covered; any failing or missing tests.
 - **Rework list:** Concrete, actionable items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**. No vague “improve X.”
 
@@ -183,7 +155,8 @@ Each mode has distinct responsibilities and output expectations.
 
 ## Cross-phase standards
 
-- **Consistency:** All phases respect `core-standards.md` and domain rules (`api-routes.md`, etc.).
+- **Token budget and agent communication:** token-policy applies to **all phases** (ASK/PLAN/AGENT): concise answers, no filler, lean diffs, batched tools, and XML task blueprints when work is complex or high-stakes.
+- **Consistency:** All phases respect `core-standards.md` and domain rules (`api-routes.md`, `typescript.md`, `react.md`, `e2e-tests.md`, etc.); they are **additive** with token-policy.
 - **Traceability:** Link code and review back to the plan (e.g. “implements AC-1, AC-2” in commits or PR description).
 - **Single source of truth:** The plan doc is the contract; change it when scope or criteria change, then proceed.
 - **Smooth handoff:** Each phase ends with written artifacts the next phase needs; avoid “verbal” handoffs only.

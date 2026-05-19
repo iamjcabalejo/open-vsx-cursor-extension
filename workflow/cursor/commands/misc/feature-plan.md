@@ -9,21 +9,16 @@ model: claude-sonnet-4-5
 
 You MUST run this command in **Plan mode**. Do not implement code, create application files, or run build/test commands. Your only allowed output is the plan document (and writing it to `docs/plans/<feature-slug>.md`). If the user or context asks you to "also implement" or "start coding," decline and remind them: feature-plan is planning only; use project-manager with this plan to run Code ? Review/Test.
 
-## Token-efficient response policy (always on)
+## Token policy (mandatory)
 
-Use token-efficient mode for all plan-writing output in this command.
-
-- **Default intensity:** `full`
-- **Allowed levels:** `lite`, `full`, `ultra`
-- **Rule:** concise but complete; never remove required plan sections or acceptance-criteria traceability.
-- **Auto-clarity override:** use explicit full-language wording for destructive/irreversible/security-sensitive warnings and ambiguity-prone instructions.
-- **No ambiguous compression:** do not compress away scope boundaries, required checklists, file paths, or pass/fail conditions.
+Apply **`.cursor/rules/token-policy.mdc`** first—**refine** the user’s feature request into a tight plan brief (Session entry flow), then author the plan doc; no filler. Never remove required plan sections, acceptance-criteria traceability, scope boundaries, or pass/fail conditions.
 
 ## Clarification-first planning (interactive)
 
 Before writing the final plan, ask relevant clarifying questions when any requirement is ambiguous or missing. Focus on business goal, in-scope vs out-of-scope, target users, constraints, dependencies, integration points, edge cases, non-functional requirements (security/performance), and acceptance criteria. Do not invent missing details.
 
 If details are unclear:
+
 1. Ask concise, high-impact follow-up questions.
 2. Wait for answers (or explicitly mark assumptions if the user asks to proceed without answers).
 3. Reflect the resolved clarifications in the final plan.
@@ -76,28 +71,33 @@ Include every section below so **project-manager** can load and delegate without
 Produce a **detailed** plan so project-manager and implementers can work without guessing. For each section, include the level of detail below.
 
 ### Task analysis / metadata (at top of plan, after title)
+
 - **Type**: [Feature / Bug Fix / Refactor / Infrastructure]
 - **Complexity**: [Small / Medium / Large / Very Large] with 1?2 sentence justification
 - **Estimated effort**: X hours or days (Small: 1?2h, Medium: 0.5?1 day, Large: 2?5 days, Very Large: 1+ week)
 - **Priority**: [High / Medium / Low] (optional, if known)
 
 ### Scope / metadata
+
 - In scope: short bullet list of what is included
 - Out of scope: what is explicitly excluded (or "None" if N/A)
 - Security: `Security: critical` or omit
 - Performance: `Performance: critical` or omit
 
 ### Feature overview
+
 - **Problem**: 2?4 sentences on the problem or opportunity
 - **Audience**: Who uses this (e.g. end users, admins, API consumers)
 - **Key functionality**: 3?6 bullet points of main capabilities
 
 ### Acceptance criteria
+
 - One criterion per bullet; each testable (Given/When/Then or clear pass/fail)
 - Number every criterion: AC-1, AC-2, AC-3, ?
 - Cover happy path and critical edge cases (auth, errors, empty states)
 
 ### Technical design
+
 - **Components / modules**: Named components, layers, or modules and their responsibility (1?2 sentences each)
 - **Endpoints / APIs**: For each endpoint: method, path, brief purpose, request shape (key fields), response shape (key fields), errors
 - **Data model / schema**: Main entities, key fields, relationships; DB tables or collections if applicable
@@ -105,6 +105,7 @@ Produce a **detailed** plan so project-manager and implementers can work without
 - **References**: Mention `core-standards.mdc`, `api-routes.mdc` (or other project rules) where they apply
 
 ### Backend tasks
+
 - **Phase 1 ? Setup**: Env vars, config, new packages; list concrete file changes
 - **Phase 2 ? Database** (if any): Schema changes, migrations, indexes; list files and key operations
 - **Phase 3 ? API**: Per endpoint or area: steps as checkboxes (e.g. `- [ ] Add GET /api/...`, `- [ ] Validate input`, `- [ ] Return 404 when not found`)
@@ -112,6 +113,7 @@ Produce a **detailed** plan so project-manager and implementers can work without
 - For each phase: list **file changes** (path + create/modify) and **dependencies/env** (packages, env vars)
 
 ### Frontend tasks
+
 - **Phase 1 ? Components**: Per component: name, responsibility, props/API; file path (create/modify)
 - **Phase 2 ? Pages / views**: Routes, layout, data loading; file changes
 - **Phase 3 ? Integration**: API client usage, state, error handling; which backend endpoints are called
@@ -119,27 +121,32 @@ Produce a **detailed** plan so project-manager and implementers can work without
 - Include **API contract** summary: which endpoints the frontend calls and with what payloads
 
 ### Integration & testing
+
 - **E2E flows**: Named user journeys (e.g. "User can sign up and see dashboard") with 3?6 steps each
 - **Critical paths**: List flows that must be covered by E2E
 - **Unit / integration**: Which areas need unit tests (e.g. API handlers, utils) or integration tests (e.g. DB + API)
 
 ### File changes
+
 - Explicit list in a code block or table, e.g.:
   - `path/to/file.ts` (create)
   - `path/to/other.ts` (modify)
 - Group by area (backend, frontend, shared, config) if helpful
 
 ### Dependencies / env
+
 - **Packages**: Exact package names and purpose (e.g. `zod` for validation); optional version if project pins
 - **Env vars**: Name, purpose, example value (e.g. `API_KEY=...`), required vs optional
 - **Config changes**: Config files or keys to add/change
 
 ### Risks / potential issues (recommended)
+
 - 2?5 bullets: unknown dependencies, migration risks, breaking changes, third-party limits, performance considerations
 - For each: brief mitigation or "TBD"
 - Include a **RiskControls** subsection mapping each risk to: control, validation, and pass condition (no open TBDs for critical risks).
 
 ### Next steps (recommended)
+
 - 1. Run project-manager with this plan
 - 2. (Optional) Any prep the user should do before running project-manager
 

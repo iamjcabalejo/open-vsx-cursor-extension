@@ -6,6 +6,8 @@ alwaysApply: false
 
 # E2E Tests
 
+*Also applies:* `token-policy.mdc` (answer shape, diffs, tools). This file is test patterns only; both apply.
+
 ## Selectors
 - **Prefer**: `getByRole`, `getByLabelText`, `getByPlaceholderText`, `getByTestId`
 - **Avoid**: Deep CSS selectors, `:nth-child`, XPath for layout—they break on refactors

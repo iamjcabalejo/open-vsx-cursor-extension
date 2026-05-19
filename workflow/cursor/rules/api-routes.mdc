@@ -6,6 +6,8 @@ alwaysApply: false
 
 # API Routes
 
+*Also applies:* `token-policy.mdc` (agent answers, diffs, tools). This file is HTTP contract only; both apply.
+
 ## Validation
 - Validate all input at the route boundary before business logic
 - Use a schema library (Zod, Yup) for request body, query, and params

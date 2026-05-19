@@ -5,7 +5,7 @@ description: Orchestrate the compounding development cycle (Plan → Code → Re
 
 # Project Manager Skill
 
-This skill enforces the **compounding development cycle** (`.cursor/rules/compounding-dev-cycle.mdc`) with strict phase discipline and **automatic mode switching** (ASK → PLAN → AGENT). When orchestrating the cycle, you MUST follow the rule’s **Mode switching** and **Mode transition guide** sections.
+This skill enforces **token-policy** (`.cursor/rules/token-policy.mdc`: refine → hand off) and the **compounding development cycle** (`.cursor/rules/compounding-dev-cycle.mdc`) with strict phase discipline and **automatic mode switching** (ASK → PLAN → AGENT). When orchestrating the cycle, you MUST follow both rules’ **Mode switching** and **Mode transition guide** sections.
 
 ---
 
@@ -13,13 +13,13 @@ This skill enforces the **compounding development cycle** (`.cursor/rules/compou
 
 Switch modes explicitly as you progress. Each phase runs in a specific mode; state the mode when handing off to agents or instructing the user.
 
-| Phase | Mode | Purpose |
-|-------|------|---------|
-| **1a. Plan discovery** | **ASK** | Clarifying questions; gather requirements; structured requirements or RFC. Exit when scope and AC are unambiguous. |
-| **1b. Plan authoring** | **PLAN** | Write scope, AC, technical approach, task list. Output: single plan doc. Exit when another agent can implement without guessing. |
-| **2. Code** | **AGENT** | Full implementation. Subagents may edit, run commands, create files. |
-| **3. Review/Test** | **AGENT** (review-only) | Reviewers produce rework list and summary; do not apply changes unless explicitly asked. Use **Ask mode** in Cursor for read-only review. |
-| **4. Plan (rework)** | **PLAN** | Rework plan only; no implementation. Then AGENT (Code) → AGENT (Review) again. |
+| Phase                  | Mode                    | Purpose                                                                                                                                   |
+| ---------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **1a. Plan discovery** | **ASK**                 | Clarifying questions; gather requirements; structured requirements or RFC. Exit when scope and AC are unambiguous.                        |
+| **1b. Plan authoring** | **PLAN**                | Write scope, AC, technical approach, task list. Output: single plan doc. Exit when another agent can implement without guessing.          |
+| **2. Code**            | **AGENT**               | Full implementation. Subagents may edit, run commands, create files.                                                                      |
+| **3. Review/Test**     | **AGENT** (review-only) | Reviewers produce rework list and summary; do not apply changes unless explicitly asked. Use **Ask mode** in Cursor for read-only review. |
+| **4. Plan (rework)**   | **PLAN**                | Rework plan only; no implementation. Then AGENT (Code) → AGENT (Review) again.                                                            |
 
 **Handoff rule:** When you delegate a phase, tell the recipient which mode to use (ASK / PLAN / AGENT). Example: "Run this task in **Agent mode**" or "Perform this review in **Ask mode** and produce a rework list; do not apply changes." Follow the rule’s **Mode transition guide** (Initial cycle and Rework cycle) for step order.
 
@@ -34,6 +34,7 @@ Switch modes explicitly as you progress. Each phase runs in a specific mode; sta
 **Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
 
 **Outputs (handoff to Code):**
+
 - **Scope:** In/out; dependencies and boundaries.
 - **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
 - **Technical approach:** Key components, APIs, data shapes; references to rules (e.g. `core-standards.mdc`, `api-routes.mdc`).
@@ -56,6 +57,7 @@ Switch modes explicitly as you progress. Each phase runs in a specific mode; sta
 **Inputs:** Plan artifact, project rules (core-standards, api-routes, typescript, react, e2e-tests), existing code.
 
 **Outputs (handoff to Review/Test):**
+
 - **Implementation:** Code that satisfies acceptance criteria and project standards.
 - **Tests:** Unit/integration/API tests for new behavior; api-test / E2E patterns where relevant.
 - **Implementation notes** (use this template):
@@ -81,6 +83,7 @@ Switch modes explicitly as you progress. Each phase runs in a specific mode; sta
 **Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
 
 **Outputs (handoff to Plan or Code):**
+
 - **Review summary:** Alignment with plan; adherence to core-standards, api-routes; security/performance notes.
 - **Test status:** Which AC are covered; failing or missing tests.
 - **Rework list:** Concrete items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**.

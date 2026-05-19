@@ -1,4 +1,5 @@
 #!/bin/bash
+# token-policy: minimal side effects; skip quietly if no formatter on PATH.
 # Runs after agent edits a file. Format the edited file if formatter exists.
 # Receives JSON via stdin: {"file_path":"<path>","edits":[...]}
 # Customize to run: prettier --write, eslint --fix, etc.

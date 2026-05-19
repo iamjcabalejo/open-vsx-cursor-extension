@@ -6,15 +6,9 @@ model: claude-sonnet-4-5
 
 Run this command in **Ask mode** only. This command is explanation/review-only: do not modify files, do not run write operations, and do not implement changes unless the user explicitly asks to switch to implementation.
 
-## Token-efficient response policy (always on)
+## Token policy (mandatory)
 
-Use token-efficient mode for all explanations and analysis output.
-
-- **Default intensity:** `full`
-- **Allowed levels:** `lite`, `full`, `ultra`
-- **Rule:** concise but complete; keep educational correctness and required output structure.
-- **Auto-clarity override:** switch to explicit, uncompressed warnings for security-sensitive, destructive, or ambiguity-prone instructions.
-- **No ambiguous compression:** do not remove critical caveats, assumptions, or safety constraints in explanations.
+Apply **`.cursor/rules/token-policy.mdc`** for all explanations and analysis: concise but complete; do not remove critical caveats, assumptions, or safety constraints.
 
 # Code Explanation and Analysis
 
@@ -432,7 +426,7 @@ class AlgorithmVisualizer:
 │ │ │ │
 │ │ │ └─> Base case: Return 1
 │ │ │
-│ │ └─> Return: 1 * 1 = 1
+│ │ └─> Return: 1 \* 1 = 1
 │ │
 │ └─> Return: 2 \_ 1 = 2
 │

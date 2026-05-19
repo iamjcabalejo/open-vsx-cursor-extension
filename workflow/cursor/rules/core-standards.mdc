@@ -28,3 +28,7 @@ alwaysApply: true
 - Prefer `const` over `let`; avoid `var`
 - Avoid magic numbers and strings; extract to named constants
 - Comment *why*, not *what*; code should be self-explanatory
+
+## Session communication and context
+- **Answer shape, handoff brevity, code citations vs pastes, and batched tool use** are defined in **`token-policy.mdc`**; follow that rule in every session. It also covers **refine → hand off** before commands/agents/skills, and **internal XML task blueprints** for complex work.
+- Domain rules in this folder (e.g. `typescript`, `api-routes`, `react`, `e2e-tests`) are **additive** for stack and file patterns. If something conflicts about how much to say or what to put in a diff, **`token-policy.mdc` wins** for the agent’s own communication.

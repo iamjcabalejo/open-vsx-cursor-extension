@@ -6,6 +6,8 @@ alwaysApply: false
 
 # TypeScript
 
+*Also applies:* `token-policy.mdc` (answer shape, diffs, tools). This file is language-only; both apply.
+
 ## Types
 - Avoid `any`; use `unknown` for truly unknown values, then narrow with type guards
 - Prefer `interface` for object shapes; `type` for unions, intersections, and mapped types

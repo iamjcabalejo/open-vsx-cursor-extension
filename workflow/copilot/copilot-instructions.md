@@ -2,42 +2,53 @@
 
 Apply these rules and use the referenced agent perspectives when working in this repo.
 
+**Always on:** **`.github/instructions/token-policy.instructions.md`** (`applyTo: "**"`) — refine → hand off, concise sessions, lean diffs, XML blueprints for complex work. See also **`.github/instructions/compounding-dev-cycle.instructions.md`**.
+
 ## Rules
+
+### token policy
+
+See **`.github/instructions/token-policy.instructions.md`** (always applied). Summary: refine user input before agents/skills; concise complete answers; no filler; smallest diff; internal XML blueprint when work is complex or high-stakes.
 
 ### api routes
 
 # API Routes
 
 ## Validation
+
 - Validate all input at the route boundary before business logic
 - Use a schema library (Zod, Yup) for request body, query, and params
 - Return 400 for invalid input with field-level error details
 
 ## Response Shape
+
 - Success: return the resource or `{ data: ... }`; use 200 (GET/PUT/PATCH), 201 (POST), 204 (DELETE)
 - Errors: use consistent shape: `{ error: { code: string, message: string, details?: array } }`
 - Never expose stack traces, internal paths, or sensitive data in production
 
 ## Status Codes
-| Code | Use case |
-|------|----------|
-| 200 | Success (GET, PUT, PATCH) |
-| 201 | Created (POST) |
-| 204 | No content (DELETE) |
-| 400 | Bad request, validation failed |
-| 401 | Unauthorized, not authenticated |
-| 403 | Forbidden, authenticated but not allowed |
-| 404 | Resource not found |
-| 409 | Conflict (e.g., duplicate) |
-| 500 | Server error (log details, return generic message) |
+
+| Code | Use case                                           |
+| ---- | -------------------------------------------------- |
+| 200  | Success (GET, PUT, PATCH)                          |
+| 201  | Created (POST)                                     |
+| 204  | No content (DELETE)                                |
+| 400  | Bad request, validation failed                     |
+| 401  | Unauthorized, not authenticated                    |
+| 403  | Forbidden, authenticated but not allowed           |
+| 404  | Resource not found                                 |
+| 409  | Conflict (e.g., duplicate)                         |
+| 500  | Server error (log details, return generic message) |
 
 ## Security
+
 - Authenticate and authorize before processing; return 401/403 early
 - Validate content-type and body size; reject unexpected payloads
 - Use parameterized queries; never concatenate user input into SQL
 - Rate limit sensitive endpoints (auth, password reset)
 
 ## Structure
+
 - Keep route handlers thin; delegate to service/use-case layer
 - Use try/catch; map known errors to status codes; log unexpected errors
 - Document endpoints (OpenAPI/JSDoc) with params, body, and response shapes
@@ -112,6 +123,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** User request, existing codebase, constraints (deadlines, stack, standards).
 
 **Outputs (handoff to Code):**
+
 - **Scope:** What is in/out; dependencies and boundaries.
 - **Acceptance criteria:** Testable conditions (Given/When/Then or checklist).
 - **Technical approach:** Key components, APIs, data shapes; references to existing rules (e.g. `core-standards.md`, `api-routes.md`).
@@ -134,6 +146,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan artifact, project rules (core-standards, api-routes, typescript, react, e2e-tests), existing code.
 
 **Outputs (handoff to Review/Test):**
+
 - **Implementation:** Code that satisfies acceptance criteria and project standards.
 - **Tests:** Unit/integration/API tests for new behavior; follow `api-test` / E2E patterns where relevant.
 - **Implementation notes:** Short list of what was done, what was deferred, and any assumptions or env/config changes. Use this minimal template for consistency:
@@ -159,6 +172,7 @@ Each mode has distinct responsibilities and output expectations.
 **Inputs:** Plan (acceptance criteria), code diff, implementation notes, test results.
 
 **Outputs (handoff to Plan or Code):**
+
 - **Review summary:** Alignment with plan, adherence to core-standards and api-routes, security and performance notes.
 - **Test status:** Which acceptance criteria are covered; any failing or missing tests.
 - **Rework list:** Concrete, actionable items (file/line or component + required change + **severity**). Severity: **Critical** (must fix before production), **Suggestion**, **Nice to have**. No vague “improve X.”
@@ -195,54 +209,64 @@ Each mode has distinct responsibilities and output expectations.
 # Core Standards
 
 ## Type Safety
+
 - Prefer explicit types over `any`; use `unknown` when type is truly unknown, then narrow
 - Avoid type assertions (`as`) unless necessary; prefer type guards or better typing
 
 ## Error Handling
+
 - Handle errors explicitly; never swallow with empty `catch` blocks
 - Log errors before rethrowing; include context (e.g., operation name, input summary)
 - Use custom error classes for domain-specific failures when helpful
 
 ## Function Design
+
 - Keep functions focused on one concern; extract when they exceed ~30 lines
 - Prefer pure functions when possible; isolate side effects at boundaries
 - Use early returns and guard clauses to reduce nesting
 
 ## Naming
+
 - Use meaningful names; avoid abbreviations except common ones (`id`, `url`, `err`, `req`, `res`)
 - Booleans: `isLoading`, `hasError`, `canEdit`
 - Functions: verb-first (`fetchUser`, `validateInput`, `formatDate`)
 
 ## General
+
 - Prefer `const` over `let`; avoid `var`
 - Avoid magic numbers and strings; extract to named constants
-- Comment *why*, not *what*; code should be self-explanatory
+- Comment _why_, not _what_; code should be self-explanatory
 
 ### e2e tests
 
 # E2E Tests
 
 ## Selectors
+
 - **Prefer**: `getByRole`, `getByLabelText`, `getByPlaceholderText`, `getByTestId`
 - **Avoid**: Deep CSS selectors, `:nth-child`, XPath for layout—they break on refactors
 - Add `data-testid` when role/label are insufficient; keep IDs stable and semantic
 
 ## Waiting
+
 - Rely on Playwright auto-waiting; avoid `page.waitForTimeout()` (causes flakiness)
 - Use `expect(locator).toBeVisible()` or `locator.click()` (auto-waits before click)
 - For network: `page.waitForResponse()`, `page.waitForRequest()` when needed
 
 ## Test Design
+
 - Each test must run in isolation; no shared mutable state between tests
 - Use `beforeEach` for setup; seed or reset data per test
 - Use unique test data (timestamps, UUIDs) to avoid collisions in parallel runs
 
 ## Structure
+
 - Use Page Object Model for reusable page interactions; keep tests readable
 - Group tests by feature or user flow with `test.describe`
 - Assert outcomes, not implementation; test what the user sees and does
 
 ## Reliability
+
 - Keep individual tests under ~30 seconds; split long flows if needed
 - Use `trace: 'on-first-retry'` and `screenshot: 'only-on-failure'` for debugging
 - Run tests locally before pushing; fix flakiness immediately—never ignore
@@ -252,27 +276,32 @@ Each mode has distinct responsibilities and output expectations.
 # React
 
 ## Component Structure
+
 - Use functional components and hooks; avoid class components for new code
 - Keep components under ~100 lines; extract subcomponents or custom hooks when larger
 - Colocate related logic (state, effects) with the component; extract to hooks when reused
 
 ## Accessibility
+
 - Ensure every form input has an associated `<label>` (use `htmlFor`/`id` or wrap)
 - Use semantic HTML: `<button>` for actions, `<a>` for navigation, headings in order
 - Add `data-testid` for elements that need E2E selectors when role/label are insufficient
 - Support keyboard navigation; avoid `tabIndex` except to fix focus order
 
 ## State & Data
+
 - Prefer server components when no client interactivity is needed
 - Use `useState` for local UI state; lift state only when necessary
 - Fetch data at the appropriate level; avoid prop drilling—use context or composition
 
 ## Performance
+
 - Memoize expensive computations with `useMemo`; memoize callbacks with `useCallback` when passing to memoized children
 - Use `React.lazy` and `Suspense` for code-splitting large routes or components
 - Avoid inline object/array creation in JSX props (causes unnecessary re-renders)
 
 ## Patterns
+
 - Extract reusable UI into small, composable components
 - Use compound components or render props for flexible APIs
 - Prefer composition over prop drilling; avoid "prop drilling" beyond 2–3 levels
@@ -282,27 +311,32 @@ Each mode has distinct responsibilities and output expectations.
 # TypeScript
 
 ## Types
+
 - Avoid `any`; use `unknown` for truly unknown values, then narrow with type guards
 - Prefer `interface` for object shapes; `type` for unions, intersections, and mapped types
 - Use `strictNullChecks`; handle `null` and `undefined` explicitly
 - Export types alongside the code that uses them; avoid separate type-only files unless shared
 
 ## Declarations
+
 - Use `const` by default; `let` only when reassignment is needed
 - Prefer `const` assertions for literal types: `as const`
 - Use `readonly` for arrays/objects that should not be mutated
 
 ## Functions
+
 - Always type function parameters and return types for public APIs
 - Use optional params (`?`) or overloads for flexibility; avoid `any` in signatures
 - Prefer `void` for functions that return nothing; avoid implicit `undefined` returns
 
 ## Imports
+
 - Use `import type` for type-only imports to enable better tree-shaking
 - Prefer named imports over default when exporting multiple items
 - Avoid circular dependencies; extract shared types to a separate module if needed
 
 ## Examples
+
 ```typescript
 // Good: explicit, narrow types
 function parseUserId(input: unknown): string {
@@ -335,4 +369,5 @@ function parseUserId(input: any): string { ... }
 - **technical-writer**: Create clear, comprehensive technical documentation tailored to specific audiences with focus on usability and accessibility
 
 ---
-*Generated by Plan-Code-Review Workflow extension for GitHub Copilot.*
+
+_Generated by Plan-Code-Review Workflow extension for GitHub Copilot._

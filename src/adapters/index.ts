@@ -4,7 +4,12 @@ import { applyClaude, removeClaude } from "./claude";
 import { applyCopilot, removeCopilot } from "./copilot";
 import { applyCodex, removeCodex } from "./codex";
 
-export type { AIAssistant, AdapterContext, ApplyResult, WorkflowAdapter } from "./types";
+export type {
+  AIAssistant,
+  AdapterContext,
+  ApplyResult,
+  WorkflowAdapter,
+} from "./types";
 export { detectAvailableAssistants, recommendAssistant } from "./detect";
 
 const adapters: WorkflowAdapter[] = [
@@ -34,7 +39,8 @@ const adapters: WorkflowAdapter[] = [
   {
     id: "codex",
     name: "Codex",
-    description: "Sync workflow/codex/skills to ~/.codex/skills and create AGENTS.md",
+    description:
+      "Install Codex workflow in project (AGENTS.md) or user dir (~/.codex)",
     extensionId: "openai.chatgpt",
     apply: applyCodex,
     remove: removeCodex,
@@ -68,11 +74,17 @@ export async function removeWorkflowAll(context: {
     try {
       const result: RemoveResult = await adapter.remove(adapterContext);
       if (result.success && result.details?.length) {
-        allDetails.push(`${adapter.name}:`, ...result.details.map((d) => `  ${d}`));
+        allDetails.push(
+          `${adapter.name}:`,
+          ...result.details.map((d) => `  ${d}`),
+        );
       } else if (!result.success) {
         failures.push(`${adapter.name}: ${result.message}`);
         if (result.details?.length) {
-          allDetails.push(`${adapter.name}:`, ...result.details.map((d) => `  ${d}`));
+          allDetails.push(
+            `${adapter.name}:`,
+            ...result.details.map((d) => `  ${d}`),
+          );
         }
       }
     } catch (err) {
