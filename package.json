@@ -2,7 +2,7 @@
   "name": "plan-code-review-workflow",
   "displayName": "Plan-Code-Review Workflow",
   "description": "Apply the Plan → Code → Review cycle to Cursor, Claude Code, GitHub Copilot, or Codex. One workflow, automatic code review, production-ready features.",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "publisher": "JhonCabalejo",
   "license": "MIT",
   "repository": {

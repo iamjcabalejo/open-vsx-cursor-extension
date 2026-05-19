@@ -1,11 +1,22 @@
 # Changelog
 
+## [5.2.1] - 2026-05-19
+
+### Fixed
+
+- **Codex project install**: Choosing **project root** now installs **`.codex/rules/`**, **`.codex/skills/`**, and workspace **`AGENTS.md`** only—nothing is written to `~/.codex/`. User-directory install still uses `~/.codex/` for all projects.
+
+### Changed
+
+- **README**: Token policy documented as a core policy alongside the compounding dev cycle; added a brief “How we stay token-efficient” section tied to Plan / Agent / Ask modes.
+- **Codex install picker**: Project option description clarifies `.codex/` stays in the workspace.
+
 ## [5.2.0] - 2026-05-19
 
 ### Added
 
-- **Token policy (all assistants)**: Canonical `token-policy` rules for Cursor (`.cursor/rules/token-policy.mdc`), Claude (`.claude/rules/token-policy.md`), Codex (`~/.codex/rules/token-policy.md` or project `AGENTS.md`), and Copilot (`token-policy.instructions.md` with `applyTo: **`). Compounding dev cycle, core standards, commands, skills, and agents reference the policy instead of duplicating inline text.
-- **Codex install target**: When applying the Codex workflow, you can choose **project root** (`AGENTS.md` in workspace) or **user directory** (`~/.codex/` with `AGENTS.md`, `rules/`, and `skills/`), matching Cursor and Claude Code.
+- **Token policy (all assistants)**: Canonical `token-policy` rules for Cursor (`.cursor/rules/token-policy.mdc`), Claude (`.claude/rules/token-policy.md`), Codex (`.codex/rules/` or `~/.codex/rules/`), and Copilot (`token-policy.instructions.md` with `applyTo: **`). Compounding dev cycle, core standards, commands, skills, and agents reference the policy instead of duplicating inline text.
+- **Codex install target**: When applying the Codex workflow, you can choose **project root** or **user directory** (`~/.codex/`), matching Cursor and Claude Code.
 
 ### Changed
 
